@@ -18,7 +18,7 @@
 - [x] Configure a runtime-local package library
 - [x] Verify a path containing spaces and relocation
 - [x] Generate ZIP, SHA-256, and metadata sidecar
-- [ ] Publish the first signed or explicitly unsigned GitHub Release
+- [x] Publish the first explicitly unsigned GitHub prerelease
 
 ## Next
 
