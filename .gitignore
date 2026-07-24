@@ -1,0 +1,5 @@
+.codex/
+.agent-scratch/
+SESSION_TRANSCRIPT.md
+*.zip
+*.exe
