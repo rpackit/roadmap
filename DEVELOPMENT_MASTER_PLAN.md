@@ -787,7 +787,7 @@ Expected output:
 
 ```text
 Platform: macOS arm64
-R: 4.5.1
+R: 4.6.1
 Node: found
 Rust/Cargo: found
 Tauri CLI: found
@@ -1668,9 +1668,9 @@ portable-r-{platform}-{arch}-{r_version}.{zip|tar.zst}
 Examples:
 
 ```text
-portable-r-windows-x86_64-4.5.1.zip
-portable-r-macos-arm64-4.5.1.tar.zst
-portable-r-macos-x86_64-4.5.1.tar.zst
+portable-r-windows-x86_64-4.6.1.zip
+portable-r-macos-arm64-4.6.1.tar.zst
+portable-r-macos-x86_64-4.6.1.tar.zst
 ```
 
 ---
@@ -1720,7 +1720,7 @@ Deliverables:
 portable-r metadata schema v1
 portable-r-windows build script
 portable-r-windows verify script
-R 4.5.1 Windows portable artifact
+R 4.6.1 Windows portable artifact
 GitHub Release artifact
 portable-r index entry
 ```
@@ -1919,7 +1919,7 @@ release workflow draft
 Goal:
 
 ```text
-Create first portable-r-windows-x86_64-4.5.1.zip artifact.
+Create first portable-r-windows-x86_64-4.6.1.zip artifact.
 ```
 
 ## Week 3: rpackit Checker

@@ -29,6 +29,11 @@
 - [x] Prepare atomic, versioned desktop resource bundles with portable R
 - [x] Restore hello-shiny dependencies and smoke-test its bundled launcher over
       HTTP without using system R
+- [x] Manage the bundled Shiny process with versioned startup events, HTTP
+      readiness, graceful control-file shutdown, and verified wrapper/runtime
+      cleanup
+- [x] Publish a reproducible hello-shiny Windows quickstart with runtime
+      SHA-256 verification
 - [ ] Enforce the session token for HTTP and WebSocket traffic
 - [ ] Generate Tauri desktop projects
 - [ ] Package hello-shiny as a native desktop executable
