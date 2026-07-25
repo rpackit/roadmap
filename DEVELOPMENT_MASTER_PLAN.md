@@ -1,5 +1,11 @@
 # rpackit Master Development Plan
 
+> **Status:** This document is the target product design, not a list of
+> currently exported APIs. See `ROADMAP.md` and the `rpackit` package README
+> for implemented, copy-pasteable workflows. In particular,
+> `build_desktop()`, `build_static()`, `build_server()`, and `init_release()`
+> remain planned APIs as of rpackit 0.1.1.
+
 **Version:** 0.1 draft  
 **Date:** 2026-05-07  
 **Purpose:** This document is the master development specification for the `rpackit` GitHub organization. It is designed to be pasted into Codex as the source of truth for planning, repository creation, issue generation, implementation, and code review.
@@ -1960,21 +1966,30 @@ git clone https://github.com/rpackit/rpackit-examples
 cd rpackit-examples/hello-shiny
 
 Rscript -e 'rpackit::check_app(".")'
-Rscript -e 'rpackit::build_desktop(".", mode = "portable")'
+Rscript -e 'rpackit::plan_dependencies(".")'
+Rscript -e 'rpackit::prepare_desktop(".", runtime_dir = "/path/to/portable-r")'
 ```
 
-Expected result:
+Current implemented result:
 
 ```text
-dist/HelloShiny-setup.exe
+dist/desktop-resources/resources/
+  R/
+  app/
+  launcher.R
+  rpackit.json
 ```
 
-Demo claim:
+Current verified claim:
 
 ```text
-A Shiny app packaged as a Windows desktop app with bundled R.
-No R installation required for the end user.
+The hello-shiny resources run with the bundled Windows R and bundled package
+library, without consulting a system R installation. The launcher serves the
+app on 127.0.0.1 and passes an HTTP smoke test.
 ```
+
+The future native-executable acceptance target remains
+`dist/HelloShiny-setup.exe`; it is not yet an implemented output.
 
 ---
 

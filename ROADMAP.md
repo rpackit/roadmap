@@ -10,7 +10,11 @@
 
 - [x] Implement `doctor()`
 - [x] Implement `check_app()`
+- [x] Implement non-executing dependency plans from R syntax, DESCRIPTION, and
+      renv.lock
 - [x] Detect Shiny layouts, packages, renv, system calls, and static-web risks
+- [x] Require the actual Tauri CLI and native prerequisites before `doctor()`
+      reports desktop-build support
 
 ## Portable R Windows
 
@@ -22,7 +26,11 @@
 
 ## Next
 
+- [x] Prepare atomic, versioned desktop resource bundles with portable R
+- [x] Restore hello-shiny dependencies and smoke-test its bundled launcher over
+      HTTP without using system R
+- [ ] Enforce the session token for HTTP and WebSocket traffic
 - [ ] Generate Tauri desktop projects
-- [ ] Package hello-shiny without a system R dependency
+- [ ] Package hello-shiny as a native desktop executable
 - [ ] Add shinylive and Docker targets
 - [ ] Add macOS portable runtime builders
