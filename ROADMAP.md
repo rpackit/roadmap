@@ -35,6 +35,9 @@ installer or Tauri application.
 - [x] Implement `check_app()`
 - [x] Implement non-executing dependency plans from R syntax, DESCRIPTION, and
       renv.lock
+- [x] Make dependency plans fail visibly for incomplete lockfiles, incompatible
+      locked versions, and `DESCRIPTION Remotes` without exact lockfile
+      provenance, without returning possibly credential-bearing remote text
 - [x] Detect Shiny layouts, packages, renv, parsed base system calls with
       file-and-line evidence, and static-web risks
 - [x] Publish a runnable getting-started article from inspection and dependency
@@ -87,6 +90,10 @@ implemented; those remain separate roadmap items below.
       SHA-256 before extraction, and reuse atomic cache entries offline
 - [x] Reject incompatible `renv.lock` or DESCRIPTION R requirements before
       copying a runtime or installing application packages
+- [x] Reject unsafe dependency plans before runtime copying, verify every
+      required DESCRIPTION package constraint after restore or installation,
+      record constraint evidence in the bundle manifest, and bind later
+      validation to the copied app and installed versions
 
 The implemented protocol is a secure backend launch contract. A stock browser
 cannot attach the protected header to top-level navigation and WebSocket

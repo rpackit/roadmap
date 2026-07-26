@@ -213,6 +213,31 @@ The result retains normalized references and provenance. Read failures,
 invalid R syntax, malformed DCF, and malformed lock records are errors rather
 than silently incomplete plans.
 
+The plan also validates installation determinism. When `renv.lock` exists,
+every non-standard package required by parsed source or required DESCRIPTION
+roles must have a lock record, and every locked version must satisfy its
+DESCRIPTION constraints. `DESCRIPTION Remotes` without an exact lockfile is an
+error rather than permission to install a same-named repository package.
+Returned plan objects expose only the presence and count of remote
+specifications, not their possibly credential-bearing text. URL credentials,
+queries, and fragments in lockfile remote provenance are redacted before the
+plan is returned or printed.
+
+`prepare_desktop(install_packages = TRUE)` rejects dependency-plan errors
+before resolving or copying a runtime. After `renv::restore()` or
+`install.packages()`, every required DESCRIPTION package constraint is checked
+against the copied runtime library before atomic publication. The manifest
+records each constraint and whether installation verified it. Setting
+`install_packages = FALSE` may produce an explicitly uninstalled inspection
+bundle; it does not turn failed dependency evidence into a successful install.
+
+Bundle validation reparses the copied application without evaluating it. New
+manifests must contain exactly the required package set and DESCRIPTION
+constraints derived from those copied files. Legacy schema-v1 manifests that
+predate additive constraint fields remain readable. When runtime verification
+is requested, package presence and all derived constraints are checked again
+inside bundled R.
+
 ## App inspection
 
 `rpackit::check_app()` never executes application source. Target states are

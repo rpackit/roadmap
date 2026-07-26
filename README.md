@@ -14,6 +14,12 @@ manifests declare this authentication and set
 `network_token_enforced` to `true`. Legacy protocol-1 bundles remain
 inspectable but cannot be launched.
 
+Dependency preparation is fail-closed as well: required lockfile records and
+DESCRIPTION package constraints are checked before runtime copying, installed
+versions are checked again before atomic publication, and `Remotes` requires
+reviewed lockfile provenance instead of silently falling back to a repository
+package.
+
 This is the authenticated backend contract, not yet a complete native desktop
 application. The pre-release
 [`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri) Phase 1 spike
