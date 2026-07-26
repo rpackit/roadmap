@@ -156,21 +156,31 @@ results. Relevant hostile fixtures omit upstream `Connection: close`, proving
 proxy-enforced isolation. `204` rejects `Content-Length` or
 `Transfer-Encoding`; `205` rejects a nonzero length or any
 `Transfer-Encoding` to avoid ambiguous stream/trailer framing; and the
-`HEAD`/`204`/`205`/`304` body policy permits no streamed bytes. The byte cap
-counts the proxied, encoded HTTP body; `Content-Encoding` decompression
-expansion remains an open response resource-abuse gate. Authenticated request
-uploads now pass a separate real-loopback matrix for total bytes, idle gaps,
+`HEAD`/`204`/`205`/`304` body policy permits no streamed bytes. Authenticated
+request uploads now pass a separate real-loopback matrix for total bytes, idle gaps,
 minimum sustained rate, total duration, and request trailers: one immediate
 bounded upload succeeds; a chunked upload stops before crossing a small test
 byte cap; independent idle, below-rate, and over-duration uploads terminate
 without a success response; and a parsed chunked trailer becomes a fixed
 `502`. The development WebView2 report records all six results, 5/5 bounded
 negative terminations, 5/5 valid parsed upstream credentials, and zero
-request-probe credential leaks. Phase 1 remains unchecked: the reviewed fixed
-minimum WebView2 runtime, forced-crash profile persistence, browser escape-path
-attempts, response-body idle/rate and decompression expansion, and WebSocket
-byte-rate limits are not all resolved. The spike is not a generated application
-or supported installer.
+request-probe credential leaks.
+
+Responses now have separate 256 MiB encoded and decoded defaults, a 15-second
+non-empty-frame idle deadline, and a 1 KiB/s floor in complete 5-second
+windows. At most two ordered `gzip`/`deflate`/`br`/`zstd` layers are decoded
+with backpressure; unsafe transforms, malformed encodings, and decoded
+overflow fail closed. A real-loopback matrix proves identity and gzip
+baselines plus five bounded idle, below-rate, expansion, malformed-gzip, and
+unsupported-coding failures. Its expansion fixture maps 67 encoded bytes to
+4,128 decoded bytes against a 32-byte cap; all 7 upstream requests are
+correctly authenticated with zero credential or attacker-marker leakage. The
+recorded WebView2 `150.0.4078.99` run passed the complete matrix and forwarded
+zero decoded bytes from the expansion case.
+Phase 1 remains unchecked: the reviewed fixed minimum WebView2 runtime,
+forced-crash profile persistence, browser escape-path attempts, and WebSocket
+byte-rate limits are not all resolved. The spike is not a generated
+application or supported installer.
 
 ## Later targets
 

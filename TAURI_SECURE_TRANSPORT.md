@@ -451,9 +451,8 @@ Tauri, wry, WebView2, Hyper, hyper-util, and Tokio minima are then pinned in
 the template and native metadata, together with the tested Windows OS
 baseline. A development-runtime pass alone is not Phase 1 completion. Open
 work includes the reviewed fixed minimum runtime, forced-crash
-profile-persistence, real browser escape-path attempts, response-body
-idle/rate and decompression-expansion abuse, WebSocket byte-rate abuse, and the
-complete fixed-runtime rerun. Strict
+profile-persistence, real browser escape-path attempts, WebSocket byte-rate
+abuse, and the complete fixed-runtime rerun. Strict
 upstream response-head validation passes valid raw HTTP and WebSocket
 baselines plus 16 HTTP and 16 WebSocket malformed or policy-unsafe cases over
 real loopback. Every rejected case returns the exact fixed secret-free 502
@@ -480,9 +479,9 @@ request-method/status policy permits zero streamed bytes for `HEAD`, `204`,
 `205`, and `304`, rejects `Content-Length` or `Transfer-Encoding` on `204`,
 and rejects a nonzero length or any `Transfer-Encoding` on `205`. Rejecting
 even an empty chunked `205` avoids ambiguous stream/trailer framing on a
-status that must not carry content. The configured byte cap applies to the
-proxied, encoded HTTP body; `Content-Encoding` decompression expansion remains
-part of the open resource-abuse gate.
+status that must not carry content. The first configured byte cap applies to
+the proxied, encoded HTTP body; the independent decoded-content boundary below
+limits expansion after supported content codings.
 Authenticated downstream request uploads separately enforce total bytes,
 non-empty-frame idle time, a minimum throughput in every complete rate window,
 total duration, and no trailers before bytes reach the fixed upstream. The
@@ -494,6 +493,26 @@ complete before a rate window ends are not subject to a minimum-size rule. The
 development WebView2 report includes the six result booleans and secret-free
 counters: 5/5 bounded negative terminations, 5/5 valid parsed upstream
 credentials, and zero request-probe credential leaks.
+
+Upstream streaming responses separately enforce encoded and decoded byte
+caps, non-empty-frame idle time, and a minimum encoded throughput in every
+complete rate window. The defaults are 256 MiB encoded, 256 MiB decoded, 15
+seconds idle, and 1 KiB/s per complete 5-second window. At most two ordered
+`gzip`/`x-gzip`, HTTP `deflate` (zlib), `br`, or `zstd` layers are decoded in
+reverse application order with backpressure. The frame crossing the decoded
+cap is never forwarded; unsupported/malformed codings, encoded partial
+responses, and `Cache-Control: no-transform` fail closed. Transformation
+removes invalidated encoding, length, range, validator, and digest metadata.
+A headless real-loopback matrix proves identity and gzip baselines plus
+independent idle, below-rate, decompression-expansion, malformed-gzip, and
+unsupported-coding failures. The 67-byte encoded expansion fixture decodes to
+4,128 bytes against a 32-byte cap. Passing requires 5/5 bounded negative
+terminations, 7/7 valid synthetic upstream credentials, and zero
+proxy-cookie, bootstrap-header, or attacker-marker leakage. The development
+WebView2 report includes these booleans and counters. The recorded
+`150.0.4078.99` run passed the complete matrix and forwarded zero decoded
+bytes from the expansion case.
+
 WebSocket activity-idle shutdown and Windows exact-loopback routing under IPv4
 wildcard, IPv6 v6-only wildcard, and IPv6 dual-stack wildcard overlap are
 covered by the development-runtime harness.
