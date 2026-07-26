@@ -187,9 +187,19 @@ correctly authenticated and normalized with zero proxy-cookie or
 bootstrap-header leakage. Recorded WebView2 `150.0.4078.99` debug and release
 runs both measured 997 ms client-to-upstream and 934 ms upstream-to-client.
 
-Phase 1 remains unchecked: the reviewed fixed minimum WebView2 runtime,
-forced-crash profile persistence, and browser escape-path attempts are not all
-resolved. The spike is not a generated application or supported installer.
+The active browser-escape matrix also passes on WebView2 `150.0.4078.99`.
+It records one external-document navigation callback and one request-layer
+network block, one popup denial, one download cancellation with an empty
+isolated directory, and two cancelled external-scheme events. Native readback
+confirms devtools, browser accelerator keys, and default context menus
+disabled; a valid unpacked extension is explicitly rejected as unsupported;
+environment and machine/user policy-registry overrides are absent before and
+after WebView creation; no `DevToolsActivePort` exists; and external
+navigation and popup collectors receive zero requests.
+
+Phase 1 remains unchecked: the reviewed fixed minimum WebView2 runtime and
+forced-crash profile persistence are unresolved. The spike is not a generated
+application or supported installer.
 
 ## Later targets
 

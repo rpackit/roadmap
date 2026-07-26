@@ -185,12 +185,12 @@ rules, is specified in `TAURI_SECURE_TRANSPORT.md`. Future generated native
 metadata records that contract version plus the template and pinned
 Tauri/wry/WebView2 minima. The pre-release
 [`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri) Phase 1 spike
-implements this boundary and has development-runtime evidence, but the complete
-fixed-runtime, crash-persistence, and browser-escape matrix remains open.
-Resource-abuse, malformed-upstream, and listener-overlap gates pass on the
-development runtime but still require the complete fixed-runtime rerun. The
-spike is not a generated application, supported installer, or release-ready
-transport.
+implements this boundary and has development-runtime evidence. The active
+browser-escape, resource-abuse, malformed-upstream, and listener-overlap gates
+pass on the development runtime but still require the complete fixed-runtime
+rerun. The reviewed fixed minimum and forced-crash profile-persistence gates
+remain open. The spike is not a generated application, supported installer, or
+release-ready transport.
 
 Directory-app `DisplayMode` and `IncludeWWW` `DESCRIPTION` semantics remain
 active under the authenticated wrapper. Any incomplete private-file cleanup

@@ -41,9 +41,13 @@ encoded and decoded byte caps, idle and sustained-rate gates, and bounded
 `gzip`/`deflate`/`br`/`zstd` decoding with a real-loopback expansion matrix.
 WebSocket tunnels now have independent 8 MiB/s directional token buckets with
 one-second bursts and a real-loopback baseline plus separate upload/download
-rate evidence. The fixed-runtime, crash-persistence, and browser-escape
-matrices are not complete, so the spike is not a supported app or
-release-ready transport.
+rate evidence. The active browser-escape matrix now passes on WebView2
+`150.0.4078.99`: external document access is blocked before network, popup and
+download creation are denied, external-scheme events are cancelled, native
+settings and extension rejection are verified, override sources are absent,
+and external collectors receive no escape requests. The fixed-runtime and
+crash-persistence matrices are not complete, so the spike is not a supported
+app or release-ready transport.
 
 Start with:
 

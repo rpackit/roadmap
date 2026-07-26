@@ -93,11 +93,13 @@ The pre-release
 [`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri) Windows spike
 implements this boundary and has current-development-runtime evidence. Cookie
 scope and clean profile recreation are empirical gates, not wrapper
-assumptions. A reviewed fixed minimum WebView2 runtime, forced-crash
-profile-persistence result, and browser escape attempts are still required
-before Phase 1 can complete. Development-runtime resource-abuse,
-malformed-upstream, and Windows wildcard-listener overlap gates now pass but
-must be rerun on the selected fixed minimum runtime.
+assumptions. The active navigation, popup, download, external-scheme, devtools,
+extension, and remote-debugging escape matrix passes on the development
+runtime. A reviewed fixed minimum WebView2 runtime and forced-crash
+profile-persistence result are still required before Phase 1 can complete.
+Development-runtime browser-escape, resource-abuse, malformed-upstream, and
+Windows wildcard-listener overlap gates must all be rerun on the selected
+fixed minimum runtime.
 
 `doctor()` may report that the external Tauri toolchain is ready on a machine.
 That diagnostic does not mean project generation, a native build API, or a

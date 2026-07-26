@@ -204,6 +204,23 @@ destination policy. Release builds disable devtools, context-menu escape
 features, extensions, and remote debugging wherever the pinned runtime exposes
 those controls.
 
+The Windows reference harness proves these as active independent controls. It
+attempts an external top-level document, popup, download, and `mailto:` launch.
+A credential-free `WebResourceRequested` document filter permits only the
+proxy origin and bundled placeholder and replaces external HTTP or HTTPS
+documents with a local `403` before network access. New windows are denied,
+downloads are cancelled into a launch-private directory that must remain
+empty, and every `LaunchingExternalUriScheme` event is cancelled.
+
+Native readback must confirm devtools, browser accelerator keys, and default
+context menus disabled. With browser extensions disabled, installing a valid
+unpacked extension must complete with `ERROR_NOT_SUPPORTED`; configuration
+alone is not evidence. Before bootstrap the shell rejects WebView2 environment
+overrides and checks HKLM and HKCU policy-registry keys in both registry views
+for application-, executable-, and wildcard-scoped runtime, channel, argument,
+and profile overrides. It repeats the registry check after creation and
+requires no `DevToolsActivePort` anywhere in the isolated profile.
+
 ## Threat model
 
 ### In scope
@@ -462,8 +479,12 @@ Tauri, wry, WebView2, Hyper, hyper-util, and Tokio minima are then pinned in
 the template and native metadata, together with the tested Windows OS
 baseline. A development-runtime pass alone is not Phase 1 completion. Open
 work includes the reviewed fixed minimum runtime, forced-crash
-profile-persistence, real browser escape-path attempts, and the complete
-fixed-runtime rerun. Strict
+profile-persistence, and the complete fixed-runtime rerun. The active
+browser-escape matrix passes on the development runtime with one blocked
+external document request, one popup denial, one download cancellation, two
+external-scheme cancellations, verified native settings and extension
+rejection, absent override sources and `DevToolsActivePort`, and zero external
+collector requests. Strict
 upstream response-head validation passes valid raw HTTP and WebSocket
 baselines plus 16 HTTP and 16 WebSocket malformed or policy-unsafe cases over
 real loopback. Every rejected case returns the exact fixed secret-free 502
