@@ -130,11 +130,32 @@ WebSocket frame. Sixteen HTTP and 16 WebSocket malformed or policy-unsafe
 response heads all fail with the exact fixed secret-free 502 boundary; all 34
 upstream requests carry one valid synthetic credential, all 17 WebSocket
 requests have the normalized upgrade shape, and no marker, frame, or
-unexpected upgrade reaches downstream. Phase 1 remains unchecked: the reviewed
-fixed minimum WebView2 runtime, forced-crash profile persistence, browser
-escape-path attempts, HTTP/WebSocket resource-abuse limits, and malformed
-streamed-body matrix are not all resolved. The spike is not a generated
-application or supported installer.
+unexpected upgrade reaches downstream. Seven fragmented valid ordinary-HTTP
+body/semantics baselines and 23 hostile body/trailer cases also pass. The
+baselines cover fixed-length, chunked, close-delimited, bodyless `HEAD` and
+`304` responses with nonzero hypothetical lengths, bodyless `204` without
+framing, and bodyless `205` with `Content-Length: 0`. The negatives produce 6
+exact pre-stream 502 responses,
+12 stream fail-closed terminations that either withhold the downstream head or
+leave incomplete framing, 1 empty close-delimited limit cutoff, 2 bodyless
+malicious-status terminations, and 2 response-splitting attempts exposing only
+the first safe response. The split between no-head and incomplete-framing
+outcomes is scheduling-dependent. Trailer coverage includes 97 fields against
+the configured 96-field maximum. All 30 first upstream requests carry one
+valid synthetic credential. Every keep-alive downstream socket receives a
+second authenticated request attempt; all 30 physically close before proxy
+shutdown, and no second response, attacker marker, or reusable connection
+results. Relevant hostile fixtures omit upstream `Connection: close`, proving
+proxy-enforced isolation. `204` rejects `Content-Length` or
+`Transfer-Encoding`; `205` rejects a nonzero length or any
+`Transfer-Encoding` to avoid ambiguous stream/trailer framing; and the
+`HEAD`/`204`/`205`/`304` body policy permits no streamed bytes. The byte cap
+counts the proxied, encoded HTTP body; `Content-Encoding` decompression
+expansion remains an open resource-abuse gate. Phase 1 remains unchecked: the
+reviewed fixed minimum WebView2 runtime, forced-crash profile persistence,
+browser escape-path attempts, and HTTP/WebSocket resource-abuse limits are not
+all resolved. The spike is not a generated application or supported
+installer.
 
 ## Later targets
 

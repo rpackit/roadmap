@@ -25,10 +25,15 @@ subresource, fetch, and WebSocket traffic. Direct request interception and an
 unauthenticated proxy are excluded from the accepted design. The generated
 executable will own protocol-2 launch state directly rather than serializing an
 R-returned secret. Transport contract version `2` defines the hard acceptance
-gates. Listener-overlap and the strict malformed response-head matrix now pass
-on the development runtime. The fixed-runtime, crash-persistence,
-browser-escape, resource-abuse, and malformed streamed-body matrix remains
-open, so the spike is not a supported app or release-ready transport.
+gates. Listener-overlap plus the strict malformed response-head and streamed
+response-body/trailer matrices now pass on the development runtime. The body
+matrix includes correct bodyless `HEAD`/`204`/`205`/`304` semantics, excess
+trailer fields, close-delimited overflow, and keep-alive reuse attempts after
+every raw case. Its byte cap applies to the proxied, encoded HTTP body;
+`Content-Encoding` decompression expansion remains in the open resource-abuse
+matrix. The fixed-runtime, crash-persistence, browser-escape, and
+resource-abuse matrices remain open, so the spike is not a supported app or
+release-ready transport.
 
 Start with:
 

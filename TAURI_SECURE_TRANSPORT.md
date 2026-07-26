@@ -452,16 +452,39 @@ the template and native metadata, together with the tested Windows OS
 baseline. A development-runtime pass alone is not Phase 1 completion. Open
 work includes the reviewed fixed minimum runtime, forced-crash
 profile-persistence, real browser escape-path attempts, HTTP idle/body-rate and
-WebSocket byte-rate abuse, malformed streamed-body and trailer cases, and the
-complete fixed-runtime rerun. Strict upstream response-head validation already
-passes valid raw HTTP and WebSocket baselines plus 16 HTTP and 16 WebSocket
-malformed or policy-unsafe cases over real loopback. Every rejected case
-returns the exact fixed secret-free 502 response without releasing an
-unvalidated head, attacker canary, or WebSocket frame downstream, and no
-negative case switches the downstream connection. WebSocket activity-idle
-shutdown and Windows exact-loopback routing under IPv4 wildcard, IPv6 v6-only
-wildcard, and IPv6 dual-stack wildcard overlap are covered by the
-development-runtime harness.
+WebSocket byte-rate abuse, and the complete fixed-runtime rerun. Strict
+upstream response-head validation passes valid raw HTTP and WebSocket
+baselines plus 16 HTTP and 16 WebSocket malformed or policy-unsafe cases over
+real loopback. Every rejected case returns the exact fixed secret-free 502
+response without releasing an unvalidated head, attacker canary, or WebSocket
+frame downstream, and no negative case switches the downstream connection.
+The ordinary HTTP body gate additionally proves seven fragmented valid
+body/semantics baselines and 23 hostile body/trailer cases. Fixed-length,
+chunked, and close-delimited baselines stream normally; bodyless `HEAD` and
+`304` baselines preserve a nonzero hypothetical `Content-Length` without
+false truncation, bodyless `204` accepts no framing, and bodyless `205`
+accepts `Content-Length: 0`. The negative outcomes are 6 exact pre-stream 502
+responses, 12 bounded stream fail-closed terminations that either withhold the
+downstream head or leave incomplete framing, 1 empty close-delimited limit
+cutoff, 2 bodyless malicious-status terminations, and 2 response-splitting
+attempts isolated to the first safe response. The no-head/incomplete-framing
+split is scheduling-dependent. Trailer cases include 97 fields against the
+configured 96-field maximum. All 30 first upstream requests carry one valid
+synthetic credential. The raw client attempts a second authenticated request
+on every keep-alive downstream socket; passing requires 30/30 physical closes
+before proxy shutdown, zero second responses, zero attacker markers, and zero
+reusable connections. Relevant response-splitting and no-body fixtures omit
+upstream `Connection: close`, proving proxy-enforced isolation. The captured
+request-method/status policy permits zero streamed bytes for `HEAD`, `204`,
+`205`, and `304`, rejects `Content-Length` or `Transfer-Encoding` on `204`,
+and rejects a nonzero length or any `Transfer-Encoding` on `205`. Rejecting
+even an empty chunked `205` avoids ambiguous stream/trailer framing on a
+status that must not carry content. The configured byte cap applies to the
+proxied, encoded HTTP body; `Content-Encoding` decompression expansion remains
+part of the open resource-abuse gate.
+WebSocket activity-idle shutdown and Windows exact-loopback routing under IPv4
+wildcard, IPv6 v6-only wildcard, and IPv6 dual-stack wildcard overlap are
+covered by the development-runtime harness.
 The same dual-stack contender is tested against exact IPv4 and exact IPv6.
 Wildcard bind success is not itself a failure: all four traffic paths must
 reach the exact proxies and every wildcard accept count must remain zero.
