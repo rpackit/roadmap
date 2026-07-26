@@ -185,15 +185,16 @@ rules, is specified in `TAURI_SECURE_TRANSPORT.md`. Future generated native
 metadata records that contract version plus the template and pinned
 Tauri/wry/WebView2 minima. The pre-release
 [`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri) Phase 1 spike
-implements this boundary and has development-runtime evidence. The active
-browser-escape, resource-abuse, malformed-upstream, and listener-overlap gates
-pass on the development runtime but still require the complete fixed-runtime
-rerun. The cross-process forced-crash profile-persistence gate passes on the
-development runtime with pre-crash cookie verification, same-profile
-post-crash absence, proof that graceful cleanup did not run, and profile
-removal. The reviewed fixed minimum and complete rerun remain open. The spike
-is not a generated application, supported installer, or release-ready
-transport.
+implements this boundary and has both development- and fixed-runtime evidence.
+The active browser-escape, resource-abuse, malformed-upstream,
+listener-overlap, and cross-process forced-crash profile gates pass on the
+development runtime and the exact reviewed x64 Fixed Version Runtime
+`149.0.4022.98`, in Debug and Release. Fixed startup verifies the pinned
+Microsoft package and complete expanded tree before Tauri selects it; the
+reports require that exact loaded version, contain no unproven gate, and set
+`phase1_release_ready` to true. Phase 1 is complete. The spike is not a
+generated application, supported installer, or production release; those
+claims require later phases.
 
 Directory-app `DisplayMode` and `IncludeWWW` `DESCRIPTION` semantics remain
 active under the authenticated wrapper. Any incomplete private-file cleanup

@@ -91,18 +91,16 @@ are transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
 
 The pre-release
 [`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri) Windows spike
-implements this boundary and has current-development-runtime evidence. Cookie
-scope and clean profile recreation are empirical gates, not wrapper
+implements this boundary and has development- and fixed-runtime evidence.
+Cookie scope and clean profile recreation are empirical gates, not wrapper
 assumptions. The active navigation, popup, download, external-scheme, devtools,
-extension, and remote-debugging escape matrix passes on the development
-runtime. The same-executable cross-process forced-crash profile matrix also
-passes with verified cookie presence before termination, absence after
-same-profile recreation, no graceful-cleanup sentinel, and complete profile
-removal. A reviewed fixed minimum WebView2 runtime and complete matrix rerun
-are still required before Phase 1 can complete. Development-runtime
-browser-escape, resource-abuse, malformed-upstream, crash-profile, and Windows
-wildcard-listener overlap gates must all be rerun on the selected fixed
-minimum runtime.
+extension, remote-debugging, resource-abuse, malformed-upstream,
+crash-profile, and Windows wildcard-listener overlap matrices pass on both the
+development runtime and the exact reviewed x64 Fixed Version Runtime
+`149.0.4022.98`, in Debug and Release. The fixed runner and native startup
+verify the Microsoft archive, full expanded tree, signer evidence, trusted
+runtime-folder selection, and exact loaded version. Both fixed reports have no
+unproven gate and record `phase1_release_ready: true`; Phase 1 is complete.
 
 `doctor()` may report that the external Tauri toolchain is ready on a machine.
 That diagnostic does not mean project generation, a native build API, or a
@@ -125,7 +123,7 @@ The project deliberately uses target-specific runtimes. A browser build cannot
 silently fall back to a native server, and a desktop build must not depend on a
 system R installation. Backend network-token enforcement is implemented. The
 authenticated Tauri reverse proxy and bootstrap/cookie flow now have a
-pre-release Phase 1 spike, but real launcher integration, Windows process-tree
-ownership, project generation, native packaging, the static-web builder, and
-the server builder remain target work rather than current exported
-capabilities.
+completed pre-release Phase 1 spike, but real launcher integration, Windows
+process-tree ownership, project generation, native packaging, the static-web
+builder, and the server builder remain target work rather than current
+exported capabilities.

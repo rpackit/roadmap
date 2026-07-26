@@ -206,9 +206,16 @@ forcibly terminated without reaching its graceful-cleanup sentinel, and the
 parent reopens the same profile and old hostname with no reusable cookie,
 destroys the WebView, removes the directory, and records no secret shape.
 
-Phase 1 remains unchecked only because the reviewed fixed minimum WebView2
-runtime and complete rerun are unresolved. The spike is not a generated
-application or supported installer.
+Phase 1 is now complete. The full Debug and Release matrices also pass on the
+exact reviewed x64 Fixed Version Runtime `149.0.4022.98`. Native startup and
+the runner verify the pinned Microsoft archive, expanded 259-file tree,
+executable identity and signer, trusted runtime-folder selection, and exact
+loaded version. Both fixed reports pass every development gate, contain no
+secret shape or unproven gate, and set `phase1_release_ready` to true.
+WebSocket shaping measured 1,007/934 ms in Debug and 1,006/921 ms in Release,
+with 3/3 valid normalized handshakes and no credential leakage. The spike is
+still not a generated application or supported installer; real launcher
+lifecycle is Phase 2.
 
 ## Later targets
 

@@ -29,5 +29,6 @@ interception does not currently provide a portable documented WebSocket
 guarantee, and an unauthenticated proxy would erase the existing
 loopback-client boundary. Transport contract version `2`, implementation
 constraints, and hard acceptance gates are in `TAURI_SECURE_TRANSPORT.md`.
-The `rpackit-tauri` Phase 1 spike is pre-release evidence, not a supported
-generated application or release-ready transport.
+The `rpackit-tauri` Phase 1 spike has complete development- and reviewed
+fixed-runtime evidence. It remains a pre-release acceptance harness, not a
+supported generated application, installer, or production release.

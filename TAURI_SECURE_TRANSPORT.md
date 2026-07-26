@@ -1,6 +1,6 @@
 # Tauri Secure Transport
 
-**Status:** accepted architecture with a pre-release Windows transport spike
+**Status:** accepted architecture with the Windows Phase 1 transport gates complete
 
 **Transport contract version:** `2`
 
@@ -10,8 +10,8 @@ This document specifies how a generated Tauri application implements the
 authenticated Shiny launcher protocol. It is a security contract and a release
 gate. The pre-release Windows Phase 1 reference spike lives in
 [`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri); it is an
-acceptance harness, not a generated application, supported installer, or
-release-ready transport. The existing R-level
+acceptance harness with Phase 1 evidence, not a generated application,
+supported installer, or production release. The existing R-level
 `desktop_app_launch_config()` is a development and third-party handoff; it is
 not a secret-transport mechanism for the generated application.
 
@@ -494,13 +494,34 @@ API and produces no supported installer.
 
 Exit requires every transport and leakage gate below to pass on the minimum
 supported WebView2 runtime as well as the development runtime. The passing
-Tauri, wry, WebView2, Hyper, hyper-util, and Tokio minima are then pinned in
-the template and native metadata, together with the tested Windows OS
-baseline. A development-runtime pass alone is not Phase 1 completion. Open
-work is the reviewed fixed minimum runtime and complete fixed-runtime rerun.
-The cross-process forced-crash profile matrix passes on the development
-runtime with verified pre-crash cookie presence, forced termination without
-the graceful sentinel, same-profile post-crash cookie absence, WebView
+Tauri, wry, WebView2, Hyper, hyper-util, and Tokio minima are pinned in the
+reference implementation and versioned evidence; generated native metadata
+will carry them forward in Phase 3. A development-runtime pass alone is not
+Phase 1 completion.
+
+Phase 1 now meets this exit boundary. The development Runtime
+`150.0.4078.99` passed in Debug and Release. The same complete matrix passed
+in both profiles on the exact reviewed x64 Fixed Version Runtime
+`149.0.4022.98`; both fixed reports have every development gate true, no
+unproven release gates, and `phase1_release_ready: true`. The manifest records
+the historical API compatibility floor `120.0.2210.55` separately because
+that 2023 runtime is outside Microsoft's current public Fixed Version support
+window and is not the supported product minimum.
+
+The reviewed manifest pins the official Microsoft source, archive size and
+SHA-256, expanded 259-file/667,247,853-byte tree identity, executable digest
+and version, signer subject, and certificate thumbprint. Native startup rejects
+ambient WebView2 overrides, wrong architecture or package shape, modified
+content, reparse points, and arbitrary paths before Tauri injects the one exact
+verified runtime-folder value. The forced-crash child removes inherited
+WebView2 override variables, receives only the non-secret reviewed path, and
+repeats verification. The CI runner independently verifies the CAB and
+Authenticode evidence, executes both profiles using one Cargo target, uploads
+the secret-free reports, and removes the temporary archive and runtime.
+
+The cross-process forced-crash profile matrix passes on both runtime modes
+with verified pre-crash cookie presence, forced termination without the
+graceful sentinel, same-profile post-crash cookie absence, WebView
 destruction, profile removal, and secret-free control/report content. The
 active browser-escape matrix passes with one blocked
 external document request, one popup denial, one download cancellation, and
@@ -581,6 +602,9 @@ neither `P` nor `B`.
 The recorded WebView2 `150.0.4078.99` debug and release runs both passed at
 997 ms client-to-upstream and 934 ms upstream-to-client, with 3/3 valid
 normalized handshakes and zero credential leakage.
+The reviewed fixed Runtime `149.0.4022.98` passed at 1,007/934 ms in Debug and
+1,006/921 ms in Release with the same 3/3 valid normalized handshakes and zero
+credential leakage.
 
 Windows exact-loopback routing under IPv4 wildcard, IPv6 v6-only wildcard, and
 IPv6 dual-stack wildcard overlap is covered by the same development-runtime

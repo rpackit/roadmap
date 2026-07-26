@@ -45,9 +45,12 @@ rate evidence. The active browser-escape matrix now passes on WebView2
 `150.0.4078.99`: external document access is blocked before network, popup and
 download creation are denied, external-scheme events are cancelled, native
 settings and extension rejection are verified, override sources are absent,
-and external collectors receive no escape requests. The fixed-runtime and
-crash-persistence matrices are not complete, so the spike is not a supported
-app or release-ready transport.
+and external collectors receive no escape requests. The forced-crash matrix
+and the complete Debug/Release matrix on reviewed Fixed Version Runtime
+`149.0.4022.98` also pass. Both fixed reports verify the Microsoft
+package/tree and exact loaded version, contain no unproven gate, and record
+`phase1_release_ready: true`. Phase 1 is complete, but the spike is not a
+generated or supported app; real launcher lifecycle begins in Phase 2.
 
 Start with:
 
