@@ -9,7 +9,7 @@ portable-r-{platform}-{arch}-{r_version}.{zip|tar.zst|tar.gz}
 ```
 
 Metadata committed to the public portable-R registry must validate against
-`portable-r/schemas/portable-r-metadata-v1.schema.json` and contain an HTTPS
+`runtime/schemas/portable-r-metadata-v1.schema.json` and contain an HTTPS
 GitHub Releases URL, artifact SHA-256, archive format, and relative runtime
 paths.
 

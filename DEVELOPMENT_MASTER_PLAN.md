@@ -424,15 +424,15 @@ rpackit
 .github
 roadmap
 rpackit
-portable-r
-portable-r-windows
+runtime
+runtime-win
 rpackit-examples
 ```
 
 ## 7.2 Later Repositories
 
 ```text
-portable-r-macos
+runtime-mac
 rpackit-tauri
 rpackit-actions
 rpackit-docs
@@ -445,10 +445,10 @@ rpackit-framework
 1. .github
 2. roadmap
 3. rpackit
-4. portable-r
-5. portable-r-windows
+4. runtime
+5. runtime-win
 6. rpackit-examples
-7. portable-r-macos
+7. runtime-mac
 8. rpackit-tauri
 9. rpackit-actions
 10. rpackit-docs
@@ -493,9 +493,9 @@ rpackit builds portable runtimes for R apps across desktop, static web, and serv
 ## Core repositories
 
 - `rpackit`: R package and CLI
-- `portable-r`: portable R runtime index and metadata
-- `portable-r-windows`: Windows portable R builds
-- `portable-r-macos`: macOS portable R builds
+- `runtime`: portable R runtime index and metadata
+- `runtime-win`: Windows portable R builds
+- `runtime-mac`: macOS portable R builds
 - `rpackit-examples`: example apps
 ```
 
@@ -535,12 +535,12 @@ rpackit/
   AGENTS.md
 ```
 
-## 8.4 `portable-r`
+## 8.4 `runtime`
 
 Runtime metadata index.
 
 ```text
-portable-r/
+runtime/
   versions.json
   metadata/
   schemas/
@@ -549,12 +549,12 @@ portable-r/
 
 Large runtime archives must be released through GitHub Releases, not committed to git.
 
-## 8.5 `portable-r-windows`
+## 8.5 `runtime-win`
 
 Windows portable R builder.
 
 ```text
-portable-r-windows/
+runtime-win/
   scripts/
     build.ps1
     patch-rprofile.ps1
@@ -565,12 +565,12 @@ portable-r-windows/
   AGENTS.md
 ```
 
-## 8.6 `portable-r-macos`
+## 8.6 `runtime-mac`
 
 macOS portable R builder.
 
 ```text
-portable-r-macos/
+runtime-mac/
   scripts/
     build.sh
     patch-framework.sh
@@ -1091,13 +1091,13 @@ Initial server output should be a Docker build context, not a full cloud deploym
 
 ```text
 macOS:
-  portable-r-macos
+  runtime-mac
   .app/.dmg
   macOS Tauri builds
   codesign/notarization later
 
 Windows:
-  portable-r-windows
+  runtime-win
   .exe/.msi
   Rtools
   PowerShell scripts
@@ -1405,10 +1405,10 @@ Rscript -e "devtools::check()"
 If these cannot run, explain exactly why in the PR handoff.
 ```
 
-## 17.2 `portable-r-windows/AGENTS.md`
+## 17.2 `runtime-win/AGENTS.md`
 
 ```markdown
-# portable-r-windows agent instructions
+# runtime-win agent instructions
 
 This repository builds portable R runtimes for Windows.
 
@@ -1440,10 +1440,10 @@ If not on Windows, stop and ask the user to rerun the task on Windows.
 - Test moved-directory behavior.
 ```
 
-## 17.3 `portable-r-macos/AGENTS.md`
+## 17.3 `runtime-mac/AGENTS.md`
 
 ```markdown
-# portable-r-macos agent instructions
+# runtime-mac agent instructions
 
 This repository builds portable R runtimes for macOS.
 
@@ -1492,7 +1492,7 @@ platform:cross-platform
 Component labels:
 
 ```text
-component:portable-r
+component:runtime
 component:desktop
 component:static-web
 component:server
@@ -1534,9 +1534,9 @@ Describe the task.
 - [ ] .github
 - [ ] roadmap
 - [ ] rpackit
-- [ ] portable-r
-- [ ] portable-r-windows
-- [ ] portable-r-macos
+- [ ] runtime
+- [ ] runtime-win
+- [ ] runtime-mac
 - [ ] rpackit-tauri
 - [ ] rpackit-examples
 - [ ] rpackit-actions
@@ -1709,8 +1709,8 @@ Repos:
 .github
 roadmap
 rpackit
-portable-r
-portable-r-windows
+runtime
+runtime-win
 rpackit-examples
 ```
 
@@ -1741,12 +1741,12 @@ Every initial repo has README.md, LICENSE, AGENTS.md, .gitignore, and basic issu
 Deliverables:
 
 ```text
-portable-r metadata schema v1
-portable-r-windows build script
-portable-r-windows verify script
+runtime registry metadata schema v1
+runtime-win build script
+runtime-win verify script
 R 4.6.1 Windows portable artifact
 GitHub Release artifact
-portable-r index entry
+runtime registry index entry
 ```
 
 Acceptance criteria:
@@ -1789,7 +1789,7 @@ Deliverables:
 
 ```text
 rpackit::build_desktop(..., mode = "portable")
-portable-r-windows integration
+runtime-win integration
 Tauri project generation
 hello-shiny packaged app
 ```
@@ -1904,8 +1904,8 @@ rpackit organization
 .github repo
 roadmap repo
 rpackit repo
-portable-r repo
-portable-r-windows repo
+runtime repo
+runtime-win repo
 rpackit-examples repo
 ```
 
@@ -1933,7 +1933,7 @@ issue template
 
 ## Week 2: Windows Portable R
 
-Implement in `portable-r-windows`:
+Implement in `runtime-win`:
 
 ```text
 scripts/build.ps1
@@ -2064,8 +2064,8 @@ Generate the initial repository setup issues for:
 1. .github
 2. roadmap
 3. rpackit
-4. portable-r
-5. portable-r-windows
+4. runtime
+5. runtime-win
 6. rpackit-examples
 
 Follow the public repository hygiene policy.
