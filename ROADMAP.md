@@ -117,12 +117,15 @@ Phase 1 progress is tracked in
 Windows harness now implements the three-secret `S`/`P`/`B` transport and has
 exercised authenticated bootstrap, host-only cookie delivery, HTTP assets and
 fetches, streaming, redirects, WebSocket traffic, cross-instance isolation,
-and leakage checks on the current development WebView2 runtime. Phase 1
+and leakage checks on the current development WebView2 runtime. The listener
+gate also proves four exact-loopback traffic paths under three same-port
+contenders: IPv4 wildcard, IPv6 v6-only wildcard, and IPv6 dual-stack wildcard.
+All 32 probe requests reached the exact proxy and all wildcard accept counts
+were zero; bind success is recorded separately from interception. Phase 1
 remains unchecked: the reviewed fixed minimum WebView2 runtime,
-forced-crash profile persistence, browser escape-path attempts,
-HTTP/WebSocket resource-abuse and malformed-upstream cases, and Windows
-wildcard-listener overlap are not all resolved. The spike is not a generated
-application or supported installer.
+forced-crash profile persistence, browser escape-path attempts, and
+HTTP/WebSocket resource-abuse and malformed-upstream cases are not all
+resolved. The spike is not a generated application or supported installer.
 
 ## Later targets
 

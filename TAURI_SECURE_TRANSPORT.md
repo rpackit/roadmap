@@ -453,8 +453,12 @@ baseline. A development-runtime pass alone is not Phase 1 completion. Open
 work includes the reviewed fixed minimum runtime, forced-crash
 profile-persistence, real browser escape-path attempts, HTTP idle/body-rate and
 WebSocket byte-rate abuse, the complete malformed-upstream matrix, and the
-known Windows wildcard-listener overlap case. WebSocket activity-idle shutdown
-is already covered by the spike's deterministic suite.
+complete fixed-runtime rerun. WebSocket activity-idle shutdown and Windows
+exact-loopback routing under IPv4 wildcard, IPv6 v6-only wildcard, and IPv6
+dual-stack wildcard overlap are covered by the development-runtime harness.
+The same dual-stack contender is tested against exact IPv4 and exact IPv6.
+Wildcard bind success is not itself a failure: all four traffic paths must
+reach the exact proxies and every wildcard accept count must remain zero.
 
 ### Phase 2: real launcher lifecycle
 
