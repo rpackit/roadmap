@@ -109,7 +109,7 @@ transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
 
 ## Ordered next work
 
-1. [ ] Prove the authenticated native loopback reverse proxy in a Windows Tauri
+1. [x] Prove the authenticated native loopback reverse proxy in a Windows Tauri
        transport spike, including one-time `B` bootstrap and host-only
        HttpOnly `P` cookie authentication, HTTP/subresource/fetch/WebSocket
        coverage, redirect isolation, and every hard gate in
