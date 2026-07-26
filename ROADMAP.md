@@ -11,15 +11,17 @@ native build API or artifact already exists.
 
 | Target | Inspection or planning | Implemented output |
 |---|---|---|
-| Portable desktop resources | Implemented | Versioned resource bundle with portable R and managed Shiny lifecycle |
+| Portable desktop resources | Implemented | Versioned resource bundle with portable R and authenticated managed Shiny lifecycle |
 | Native Tauri desktop app | Toolchain readiness only | Not yet implemented |
 | Static web | Compatibility assessment only | Builder not yet implemented |
 | Dynamic server | Compatibility assessment only | Builder not yet implemented |
 
 The currently runnable desktop sequence is
 `prepare_desktop()` → `validate_desktop_bundle()` →
-`start_desktop_app()` → `desktop_app_status()` → `stop_desktop_app()`. It
-produces executable resources, not a native installer or Tauri application.
+`start_desktop_app()` → `desktop_app_launch_config()` →
+`desktop_app_status()` → `stop_desktop_app()`. It produces executable
+resources and an authenticated native-shell handoff contract, not a native
+installer or Tauri application.
 
 ## Delivered foundation
 
@@ -56,6 +58,26 @@ implemented; those remain separate roadmap items below.
 - [x] Manage the bundled Shiny process with versioned startup events, HTTP
       readiness, graceful control-file shutdown, and verified wrapper/runtime
       cleanup
+- [x] Implement launcher protocol 2 with a fresh default 256-bit
+      CSPRNG-generated session credential, delivered through a
+      current-account-private one-time `--token-file` that is consumed before
+      app or port validation
+- [x] Restrict and verify Windows DACLs for the current account plus SYSTEM,
+      and verify POSIX directory mode 0700 and credential mode 0600
+- [x] Keep rpackit from placing the credential itself in child arguments,
+      environment variables, URLs, manifests, generated lifecycle-event
+      fields, returned status, or redaction-safe print output; redact launcher
+      errors and public log/event views
+- [x] Enforce the `Shiny-Shared-Secret` request header for dynamic HTTP, static
+      HTTP, and WebSocket session acceptance, closing unauthenticated upgraded
+      sockets before an app session starts
+- [x] Gate readiness on a post-bind `listening` event and a successful
+      authenticated HTTP probe
+- [x] Record the authentication descriptor and
+      `network_token_enforced = true` in new manifests; continue validating
+      matching legacy protocol-1 bundles while refusing to launch them
+- [x] Preserve Shiny directory-app `DESCRIPTION` semantics and retain a
+      retryable managed handle whenever private-file cleanup is incomplete
 - [x] Publish a reproducible hello-shiny Windows quickstart with runtime
       SHA-256 verification
 - [x] Resolve verified portable R entries from the runtime registry, verify
@@ -63,18 +85,20 @@ implemented; those remain separate roadmap items below.
 - [x] Reject incompatible `renv.lock` or DESCRIPTION R requirements before
       copying a runtime or installing application packages
 
-The current token is a correlation/bootstrap value, not network
-authentication. Status and manifests explicitly report
-`network_token_enforced = false`.
+The implemented protocol is a secure backend launch contract. A stock browser
+cannot attach the protected header to top-level navigation and WebSocket
+upgrades. `desktop_app_launch_config()` therefore supplies a secret-bearing
+handoff only to a trusted native exact-origin injector or loopback proxy; it is
+not a browser-facing credential API.
 
 ## Ordered next work
 
-1. [ ] Enforce the per-launch session token for HTTP and WebSocket traffic
-       without exposing it in status, events, logs, or manifests.
-2. [ ] Generate a Tauri project around the validated resource contract.
-3. [ ] Package hello-shiny as a native Windows desktop executable and verify it
+1. [ ] Generate a Tauri project around the validated resource contract and
+       implement exact-origin HTTP/subresource/WebSocket header injection,
+       directly or through a native loopback proxy.
+2. [ ] Package hello-shiny as a native Windows desktop executable and verify it
        on a clean machine without system R.
-4. [ ] Generate a release workflow that publishes the verified native artifact,
+3. [ ] Generate a release workflow that publishes the verified native artifact,
        checksum, signing status, and build provenance.
 
 ## Later targets

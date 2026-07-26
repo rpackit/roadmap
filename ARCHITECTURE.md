@@ -33,18 +33,51 @@ bundle/
 ```
 
 The lifecycle manager chooses a high loopback port, starts only the bundled
-`Rscript`, waits for both a versioned launcher event and an HTTP response, and
-uses a private control file for graceful shutdown. A timeout falls back to
-asking `processx` to terminate its known process tree. Cleanup is confirmed for
-the tracked wrapper and the create-time-aware runtime handle captured from the
-launcher event; other descendant membership is not independently claimed.
-Status distinguishes the wrapper PID from the runtime PID because those are
-different processes in the verified Windows portable-R layout.
+`Rscript`, waits for a protocol-2 post-bind `listening` event, and proves
+readiness with an authenticated HTTP request. It uses a private control file
+for graceful shutdown. A timeout falls back to asking `processx` to terminate
+its known process tree. Cleanup is confirmed for the tracked wrapper and the
+create-time-aware runtime handle captured from the launcher event; other
+descendant membership is not independently claimed. Status distinguishes the
+wrapper PID from the runtime PID because those are different processes in the
+verified Windows portable-R layout.
 
-The session token is currently a correlation/bootstrap value passed to the
-application. It is not HTTP or WebSocket authentication. Public status objects
-contain only the token-free loopback URL, and the manifest records
-`network_token_enforced: false`.
+Each default launch creates a fresh 256-bit credential from the operating
+system cryptographic random source. rpackit places it in a
+current-account-private one-time file and passes only that path as
+`--token-file`; the launcher consumes and deletes the file before app or port
+validation. Windows DACLs are restricted and verified for the current account
+plus SYSTEM; POSIX permissions are verified as directory mode 0700 and file
+mode 0600. The credential is never placed in the child command line, child
+environment, or URL. The launcher configures
+Shiny's `Shiny-Shared-Secret` header authentication for dynamic and static HTTP
+as well as WebSocket traffic. New manifests describe this mechanism and record
+`network_token_enforced: true`. Protocol-1 unauthenticated bundles remain
+inspectable but cannot be launched.
+
+Protocol validation requires manifest and launcher content to agree. A secure
+protocol-2 launcher cannot be relabeled as legacy merely by editing its
+manifest. If process termination succeeds but private-file removal does not,
+the error retains a retryable managed handle. The authenticated wrapper also
+preserves Shiny directory-app `DESCRIPTION` handling.
+
+The live process handle necessarily retains the credential to perform
+authenticated readiness and create `desktop_app_launch_config()`. rpackit does
+not place it in manifests or generated event fields; public status, returned
+logs/events, launcher error messages, and redaction-safe print methods remove
+it. Raw private logs can contain arbitrary trusted app output and are not a
+secrecy boundary. Confirmed cleanup clears the managed handoff and prevents a
+new one, but cannot revoke an already returned launch-configuration object;
+the consumer must discard every copy.
+
+This boundary prevents unauthenticated loopback clients from entering a Shiny
+session; it is not isolation from the local account or the code being run.
+The threat model excludes malicious same-user processes, administrator or
+debugger access, and untrusted app or package code inside the credential-
+bearing R process. Loopback HTTP is not TLS. A future native injector or proxy
+must keep the header outside browser JavaScript, scope it to the exact
+`http://127.0.0.1:<port>` origin, cover navigation, subresources, and WebSocket
+upgrades, and never forward it across an external redirect.
 
 `doctor()` may report that the external Tauri toolchain is ready on a machine.
 That diagnostic does not mean project generation, a native build API, or a
@@ -65,6 +98,7 @@ Shiny application
 
 The project deliberately uses target-specific runtimes. A browser build cannot
 silently fall back to a native server, and a desktop build must not depend on a
-system R installation. The Tauri shell, network token enforcement,
-static-web builder, and server builder remain target work rather than current
-exported capabilities.
+system R installation. Backend network-token enforcement is implemented. The
+Tauri shell or native proxy that injects the protected header, native
+packaging, static-web builder, and server builder remain target work rather
+than current exported capabilities.
