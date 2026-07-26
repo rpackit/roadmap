@@ -5,7 +5,7 @@ implemented and verified at the scope stated here. Toolchain readiness means
 the required external tools are present; it does not mean a corresponding
 native build API or artifact already exists.
 
-**Last reviewed:** 2026-07-25
+**Last reviewed:** 2026-07-26
 
 ## Target maturity
 
@@ -88,17 +88,27 @@ implemented; those remain separate roadmap items below.
 The implemented protocol is a secure backend launch contract. A stock browser
 cannot attach the protected header to top-level navigation and WebSocket
 upgrades. `desktop_app_launch_config()` therefore supplies a secret-bearing
-handoff only to a trusted native exact-origin injector or loopback proxy; it is
-not a browser-facing credential API.
+development/third-party handoff rather than a browser-facing credential API.
+A generated Tauri application does not serialize that R-returned secret; as
+runtime owner it implements launcher protocol 2 directly and retains its
+launch state in native memory. Its transport is an authenticated loopback
+reverse proxy: it keeps the Shiny secret out of the WebView and separately
+authenticates the WebView before forwarding HTTP or WebSocket traffic. A bare
+loopback proxy and a direct interceptor are not accepted substitutes. See
+transport contract version `1` in `TAURI_SECURE_TRANSPORT.md`.
 
 ## Ordered next work
 
-1. [ ] Generate a Tauri project around the validated resource contract and
-       implement exact-origin HTTP/subresource/WebSocket header injection,
-       directly or through a native loopback proxy.
-2. [ ] Package hello-shiny as a native Windows desktop executable and verify it
+1. [ ] Prove the authenticated native loopback reverse proxy in a Windows Tauri
+       transport spike, including bootstrap/HttpOnly-cookie authentication,
+       HTTP/subresource/fetch/WebSocket coverage, redirect isolation, and every
+       hard gate in `TAURI_SECURE_TRANSPORT.md`.
+2. [ ] Integrate the protocol-2 launcher, Windows Job Object ownership, and
+       deterministic cleanup, then generate the maintained Tauri project around
+       the validated resource contract.
+3. [ ] Package hello-shiny as a native Windows desktop executable and verify it
        on a clean machine without system R.
-3. [ ] Generate a release workflow that publishes the verified native artifact,
+4. [ ] Generate a release workflow that publishes the verified native artifact,
        checksum, signing status, and build provenance.
 
 ## Later targets

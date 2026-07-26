@@ -144,16 +144,38 @@ deliberately refused by `start_desktop_app()` and must be rebuilt before
 launch. Validation also requires the protocol-1 manifest to match genuine
 protocol-1 launcher content; changing only a protocol-2 manifest is rejected.
 
-A native shell or loopback proxy consuming `desktop_app_launch_config()` must
-inject the header into initial navigation, every same-origin subrequest, and
-every WebSocket upgrade for the exact reported loopback origin. It must keep
-the credential out of browser JavaScript and must not forward it across an
-external redirect. The launch configuration contains the token-free `url`,
-exact `origin`, secret `headers`, `request_types` covering `http` and
-`websocket`, and `follow_redirects = FALSE`. Its redaction-safe print method
-does not print the credential. A stock browser cannot implement this custom
-header contract. The Tauri/proxy implementation that performs the handoff is
-not yet delivered.
+`desktop_app_launch_config()` remains the current development and trusted
+third-party native-shell handoff. It contains the token-free `url`, exact
+`origin`, secret `headers`, `request_types` covering `http` and `websocket`,
+and `follow_redirects = FALSE`; its redaction-safe print method does not print
+the credential. A consumer of that R-level object owns every copy and must
+discard it after use.
+
+A generated Tauri application does not call this function or serialize its
+returned Shiny secret across an R/native IPC boundary. The generated
+executable is the runtime owner: it implements launcher protocol 2 directly,
+creates the Shiny credential and an independent proxy-session credential,
+writes the Shiny credential only through the one-time private token file, and
+retains equivalent launch state only in native memory.
+
+Its browser transport is an authenticated native loopback reverse proxy. A
+static same-origin bootstrap installs the proxy credential as an HttpOnly
+WebView cookie under a mandatory isolated per-launch profile. Cookie scope and
+non-persistence are acceptance gates rather than assumptions about a wrapper
+API. The proxy authenticates every non-bootstrap HTTP request and WebSocket
+upgrade before dialing the fixed upstream, removes browser-supplied protected
+and forwarding headers, and injects exactly one upstream Shiny credential as
+the final request mutation. The Shiny credential never enters the WebView, and
+the proxy-session credential is never sent upstream. A bare unauthenticated
+proxy and a direct request interceptor are not accepted implementations.
+
+The native proxy never follows redirects, never forwards the protected header
+externally, and fails closed on missing or ambiguous authentication, host,
+origin, framing, upgrade, or resource-limit state. Transport contract version
+`1`, including bootstrap, HTTP/WebSocket, leakage, lifecycle, and acceptance
+rules, is specified in `TAURI_SECURE_TRANSPORT.md`. Future generated native
+metadata records that contract version plus the template and pinned
+Tauri/wry/WebView2 minima. The implementation is not yet delivered.
 
 Directory-app `DisplayMode` and `IncludeWWW` `DESCRIPTION` semantics remain
 active under the authenticated wrapper. Any incomplete private-file cleanup

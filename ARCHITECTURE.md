@@ -70,14 +70,24 @@ secrecy boundary. Confirmed cleanup clears the managed handoff and prevents a
 new one, but cannot revoke an already returned launch-configuration object;
 the consumer must discard every copy.
 
+That handoff describes the current R-managed development path. A generated
+Tauri executable does not receive or serialize
+`desktop_app_launch_config()`; it owns protocol-2 process launch, creates the
+one-time token file itself, and retains equivalent state only in native memory.
+
 This boundary prevents unauthenticated loopback clients from entering a Shiny
 session; it is not isolation from the local account or the code being run.
 The threat model excludes malicious same-user processes, administrator or
 debugger access, and untrusted app or package code inside the credential-
-bearing R process. Loopback HTTP is not TLS. A future native injector or proxy
-must keep the header outside browser JavaScript, scope it to the exact
-`http://127.0.0.1:<port>` origin, cover navigation, subresources, and WebSocket
-upgrades, and never forward it across an external redirect.
+bearing R process. Loopback HTTP is not TLS. The selected Tauri transport is an
+authenticated native loopback reverse proxy, not a direct WebView interceptor.
+It holds the upstream Shiny secret outside the browser and separately
+authenticates the WebView with an HttpOnly, per-launch proxy-session cookie
+before forwarding either HTTP or WebSocket traffic. A bare unauthenticated
+proxy would collapse the existing loopback-client boundary. The complete
+threat model and forwarding invariants are transport contract version `1` in
+`TAURI_SECURE_TRANSPORT.md`. Cookie scope and persistence remain hard
+acceptance gates for the Windows spike.
 
 `doctor()` may report that the external Tauri toolchain is ready on a machine.
 That diagnostic does not mean project generation, a native build API, or a
@@ -99,6 +109,6 @@ Shiny application
 The project deliberately uses target-specific runtimes. A browser build cannot
 silently fall back to a native server, and a desktop build must not depend on a
 system R installation. Backend network-token enforcement is implemented. The
-Tauri shell or native proxy that injects the protected header, native
-packaging, static-web builder, and server builder remain target work rather
-than current exported capabilities.
+authenticated Tauri reverse proxy, bootstrap/cookie flow, Windows process-tree
+ownership, native packaging, static-web builder, and server builder remain
+target work rather than current exported capabilities.
