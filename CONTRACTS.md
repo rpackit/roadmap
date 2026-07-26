@@ -8,9 +8,35 @@ Artifact name:
 portable-r-{platform}-{arch}-{r_version}.{zip|tar.zst|tar.gz}
 ```
 
-The metadata sidecar must validate against
-`portable-r/schemas/portable-r-metadata-v1.schema.json` and contain a release
-URL, artifact SHA-256, archive format, and relative runtime paths.
+Metadata committed to the public portable-R registry must validate against
+`portable-r/schemas/portable-r-metadata-v1.schema.json` and contain an HTTPS
+GitHub Releases URL, artifact SHA-256, archive format, and relative runtime
+paths.
+
+The package resolver accepts only registry entries whose status is
+`verified`. Remote registries, metadata, and artifacts must use stable HTTPS
+URLs without credentials, query strings, or fragments. A local registry may
+use the same schema-v1 field set while pointing to local metadata and artifact
+files for tests or air-gapped mirrors. This local transport override is an
+rpackit resolver extension; such metadata is not publishable public-registry
+metadata and is not accepted by the portable-R release validator. UNC/network
+shares are rejected. The artifact SHA-256 is verified before extraction, and a
+completed runtime is published atomically to a checksum-keyed user cache.
+
+Automatic extraction currently supports ZIP artifacts only. Archive entries
+must be ordinary files or directories, remain under the declared `r_home`,
+and contain the declared `rscript` and runtime-local `library`. Other archive
+formats fail closed until equivalent pre-extraction link and traversal checks
+are implemented. The rpackit desktop subset requires one top-level `r_home`,
+`r_home/bin/Rscript.exe` on Windows or `r_home/bin/Rscript` elsewhere, and
+`r_home/library`.
+
+Offline resolution may reuse a checksum-verified, structurally revalidated
+cache entry only when its recorded registry source, platform, architecture,
+and requested R version match. The cache is an executable trust boundary:
+rpackit creates it with private permissions where supported and rejects
+links/path escapes, but the owning user must not grant untrusted writers access
+to it.
 
 ## Desktop launcher
 
@@ -46,6 +72,19 @@ bundle/
 - HTTP-poll readiness gated by a matching `starting` event;
 - explicit dependency installation state and strategy;
 - explicit `launcher.network_token_enforced`.
+
+New schema-v1 writers also record runtime provenance additively:
+
+- `runtime.source` is `explicit` or `registry`;
+- `runtime.r_version` is an exact major.minor.patch version when known and is
+  required for a registry runtime;
+- a registry runtime has `runtime.provenance` with non-empty `registry`,
+  `metadata_source`, and `artifact_url`, a lowercase 64-character `sha256`,
+  `archive_format: "zip"`, and logical `cache_hit`.
+
+For backward compatibility, a schema-v1 bundle without `runtime.source` is
+treated as an explicit-runtime bundle, and its missing `runtime.r_version` is
+accepted. Registry provenance is never inferred for a legacy bundle.
 
 Protocol version `1` emits `starting`, `stopping`, `stopped`, and structured
 `error` events. Event payloads contain `protocol_version`, `event`, and a UTC

@@ -9,6 +9,9 @@ Shiny application
  check_app() + plan_dependencies()
        |
        v
+ verified portable-R registry -> SHA-256 cache
+       |
+       v
  prepare_desktop()
        |
        v
@@ -42,6 +45,10 @@ The session token is currently a correlation/bootstrap value passed to the
 application. It is not HTTP or WebSocket authentication. Public status objects
 contain only the token-free loopback URL, and the manifest records
 `network_token_enforced: false`.
+
+`doctor()` may report that the external Tauri toolchain is ready on a machine.
+That diagnostic does not mean project generation, a native build API, or a
+desktop artifact is implemented.
 
 ## Target architecture
 

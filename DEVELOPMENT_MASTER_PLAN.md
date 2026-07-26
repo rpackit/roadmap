@@ -1,14 +1,19 @@
 # rpackit Master Development Plan
 
-> **Status:** This document is the target product design, not a list of
-> currently exported APIs. See `ROADMAP.md` and the `rpackit` package README
-> for implemented, copy-pasteable workflows. In particular,
+> **Status:** This is the historical 0.1 target specification captured at
+> project inception. It preserves the original product design and milestone
+> intent; it is not the current execution checklist or API reference.
+> [`ROADMAP.md`](ROADMAP.md) is the current-state source of truth. See it and
+> the `rpackit` package README for implemented, copy-pasteable workflows. In
+> particular,
 > `build_desktop()`, `build_static()`, `build_server()`, and `init_release()`
-> remain planned APIs as of rpackit 0.1.1.
+> remain planned APIs as of rpackit 0.1.2.
 
 **Version:** 0.1 draft  
 **Date:** 2026-05-07  
-**Purpose:** This document is the master development specification for the `rpackit` GitHub organization. It is designed to be pasted into Codex as the source of truth for planning, repository creation, issue generation, implementation, and code review.
+**Purpose:** Preserve the original target design for architectural context.
+Current planning, implementation claims, and delivery order come from
+`ROADMAP.md`, the versioned contracts, and the owning implementation repository.
 
 ---
 
@@ -56,7 +61,7 @@ Correct portable artifact out.
 
 The initial focus is Shiny apps. Later, the organization can support additional R app styles or even a new R-native application framework. The first product should not try to replace Shiny. It should solve the practical shipping problem for existing R/Shiny users.
 
-The flagship workflow is:
+The target workflow proposed by this historical plan was:
 
 ```r
 rpackit::check_app("myapp")
@@ -764,7 +769,7 @@ signing/notarization status documented
 
 # 10. rpackit R Package Architecture
 
-## 10.1 Public API
+## 10.1 Target Public API
 
 ```r
 rpackit::doctor()
@@ -1677,6 +1682,9 @@ portable-r-macos-x86_64-4.6.1.tar.zst
 
 # 20. Milestones
 
+These are the original target milestones, not live completion status. See
+`ROADMAP.md` for implemented work and the current delivery order.
+
 ## Milestone 0: Organization Foundation
 
 Repos:
@@ -1867,6 +1875,9 @@ AppImage runs on target Linux environment.
 ---
 
 # 21. First 30-Day Execution Plan
+
+This section records the initial schedule proposed in May 2026. It is retained
+for historical context and must not be used as the current work queue.
 
 ## Week 1: Organization and Standards
 
