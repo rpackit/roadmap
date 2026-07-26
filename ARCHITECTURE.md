@@ -95,11 +95,14 @@ implements this boundary and has current-development-runtime evidence. Cookie
 scope and clean profile recreation are empirical gates, not wrapper
 assumptions. The active navigation, popup, download, external-scheme, devtools,
 extension, and remote-debugging escape matrix passes on the development
-runtime. A reviewed fixed minimum WebView2 runtime and forced-crash
-profile-persistence result are still required before Phase 1 can complete.
-Development-runtime browser-escape, resource-abuse, malformed-upstream, and
-Windows wildcard-listener overlap gates must all be rerun on the selected
-fixed minimum runtime.
+runtime. The same-executable cross-process forced-crash profile matrix also
+passes with verified cookie presence before termination, absence after
+same-profile recreation, no graceful-cleanup sentinel, and complete profile
+removal. A reviewed fixed minimum WebView2 runtime and complete matrix rerun
+are still required before Phase 1 can complete. Development-runtime
+browser-escape, resource-abuse, malformed-upstream, crash-profile, and Windows
+wildcard-listener overlap gates must all be rerun on the selected fixed
+minimum runtime.
 
 `doctor()` may report that the external Tauri toolchain is ready on a machine.
 That diagnostic does not mean project generation, a native build API, or a

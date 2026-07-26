@@ -200,8 +200,14 @@ unsupported; environment and machine/user policy-registry overrides are
 absent before and after WebView creation; no `DevToolsActivePort` exists; and
 external navigation and popup collectors receive zero requests.
 
-Phase 1 remains unchecked: the reviewed fixed minimum WebView2 runtime and
-forced-crash profile persistence are unresolved. The spike is not a generated
+The cross-process forced-crash profile matrix also passes on WebView2
+`150.0.4078.99`: the child verifies `P` in a populated private profile, is
+forcibly terminated without reaching its graceful-cleanup sentinel, and the
+parent reopens the same profile and old hostname with no reusable cookie,
+destroys the WebView, removes the directory, and records no secret shape.
+
+Phase 1 remains unchecked only because the reviewed fixed minimum WebView2
+runtime and complete rerun are unresolved. The spike is not a generated
 application or supported installer.
 
 ## Later targets

@@ -192,6 +192,19 @@ becomes the authoritative persistence boundary and must pass those two tests.
 Any failed scope/flag gate, or failure of both persistence mechanisms, rejects
 this bootstrap design.
 
+The Windows reference harness proves the crash case across native process
+boundaries. The parent creates an exact system-temporary probe root and starts
+the same executable in a restricted producer mode with only the profile and
+control paths; the producer generates all three secrets after launch. It
+verifies the exact `P` cookie and flags in a populated InPrivate profile,
+allows two seconds for storage activity, and atomically writes only the
+validated random hostname. The parent then force-terminates the producer
+without a Tauri/Rust shutdown path. A held `Drop` sentinel must remain absent.
+The parent reopens the same profile for the old hostname and requires no
+cookie named `rpackit_proxy_v1`, successful WebView destruction, and complete
+profile-directory removal. The marker and serialized report must contain no
+secret shape.
+
 ## WebView escape controls
 
 The in-window navigation allowlist contains only the exact proxy origin.
@@ -484,9 +497,12 @@ supported WebView2 runtime as well as the development runtime. The passing
 Tauri, wry, WebView2, Hyper, hyper-util, and Tokio minima are then pinned in
 the template and native metadata, together with the tested Windows OS
 baseline. A development-runtime pass alone is not Phase 1 completion. Open
-work includes the reviewed fixed minimum runtime, forced-crash
-profile-persistence, and the complete fixed-runtime rerun. The active
-browser-escape matrix passes on the development runtime with one blocked
+work is the reviewed fixed minimum runtime and complete fixed-runtime rerun.
+The cross-process forced-crash profile matrix passes on the development
+runtime with verified pre-crash cookie presence, forced termination without
+the graceful sentinel, same-profile post-crash cookie absence, WebView
+destruction, profile removal, and secret-free control/report content. The
+active browser-escape matrix passes with one blocked
 external document request, one popup denial, one download cancellation, and
 one cancelled native-origin external-scheme event whose self-tested handler
 canary remained absent. The volatile protocol registration was removed;
@@ -674,6 +690,7 @@ fallback.
 - [Microsoft: WebView2 uses the Edge/Chromium runtime](https://learn.microsoft.com/en-us/microsoft-edge/webview2/)
 - [WebView2 `ICoreWebView2CookieManager`](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2cookiemanager)
 - [WebView2 `ICoreWebView2Cookie`](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2cookie)
+- [WebView2 controller options and InPrivate profile lifecycle](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2environment10)
 - [WebView2Feedback issue 4303: WebSocket interception](https://github.com/MicrosoftEdge/WebView2Feedback/issues/4303)
 - [Tauri bundled resources](https://v2.tauri.app/develop/resources/)
 - [Tauri Windows installer and minimum WebView2 version](https://v2.tauri.app/distribute/windows-installer/)

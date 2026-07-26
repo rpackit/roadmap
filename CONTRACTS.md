@@ -188,9 +188,12 @@ Tauri/wry/WebView2 minima. The pre-release
 implements this boundary and has development-runtime evidence. The active
 browser-escape, resource-abuse, malformed-upstream, and listener-overlap gates
 pass on the development runtime but still require the complete fixed-runtime
-rerun. The reviewed fixed minimum and forced-crash profile-persistence gates
-remain open. The spike is not a generated application, supported installer, or
-release-ready transport.
+rerun. The cross-process forced-crash profile-persistence gate passes on the
+development runtime with pre-crash cookie verification, same-profile
+post-crash absence, proof that graceful cleanup did not run, and profile
+removal. The reviewed fixed minimum and complete rerun remain open. The spike
+is not a generated application, supported installer, or release-ready
+transport.
 
 Directory-app `DisplayMode` and `IncludeWWW` `DESCRIPTION` semantics remain
 active under the authenticated wrapper. Any incomplete private-file cleanup
