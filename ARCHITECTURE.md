@@ -94,9 +94,10 @@ The pre-release
 implements this boundary and has current-development-runtime evidence. Cookie
 scope and clean profile recreation are empirical gates, not wrapper
 assumptions. A reviewed fixed minimum WebView2 runtime, forced-crash
-profile-persistence result, browser escape attempts, resource-abuse and
-malformed-upstream cases, and the Windows wildcard-listener overlap gate are
-still required before Phase 1 can complete.
+profile-persistence result, and browser escape attempts are still required
+before Phase 1 can complete. Development-runtime resource-abuse,
+malformed-upstream, and Windows wildcard-listener overlap gates now pass but
+must be rerun on the selected fixed minimum runtime.
 
 `doctor()` may report that the external Tauri toolchain is ready on a machine.
 That diagnostic does not mean project generation, a native build API, or a

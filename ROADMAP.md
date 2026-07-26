@@ -177,10 +177,19 @@ unsupported-coding failures. Its expansion fixture maps 67 encoded bytes to
 correctly authenticated with zero credential or attacker-marker leakage. The
 recorded WebView2 `150.0.4078.99` run passed the complete matrix and forwarded
 zero decoded bytes from the expansion case.
+
+WebSocket tunnels now apply independent raw-byte token buckets in each
+direction, defaulting to 8 MiB/s with a one-second burst. A real-loopback
+matrix proves a small authenticated baseline plus separate 100-byte upload and
+download cases at 100 B/s with a 100 ms burst. Both shaped exchanges complete
+boundedly after the required 750 ms minimum; all 3 upstream handshakes are
+correctly authenticated and normalized with zero proxy-cookie or
+bootstrap-header leakage. Recorded WebView2 `150.0.4078.99` debug and release
+runs both measured 997 ms client-to-upstream and 934 ms upstream-to-client.
+
 Phase 1 remains unchecked: the reviewed fixed minimum WebView2 runtime,
-forced-crash profile persistence, browser escape-path attempts, and WebSocket
-byte-rate limits are not all resolved. The spike is not a generated
-application or supported installer.
+forced-crash profile persistence, and browser escape-path attempts are not all
+resolved. The spike is not a generated application or supported installer.
 
 ## Later targets
 

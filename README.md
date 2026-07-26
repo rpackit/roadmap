@@ -39,9 +39,11 @@ every raw case. Authenticated request uploads now also have tested byte, idle,
 minimum-rate, total-time, and trailer limits. Responses now have separate
 encoded and decoded byte caps, idle and sustained-rate gates, and bounded
 `gzip`/`deflate`/`br`/`zstd` decoding with a real-loopback expansion matrix.
-WebSocket byte-rate abuse remains open. The fixed-runtime, crash-persistence,
-browser-escape, and remaining resource-abuse matrices are not complete, so the
-spike is not a supported app or release-ready transport.
+WebSocket tunnels now have independent 8 MiB/s directional token buckets with
+one-second bursts and a real-loopback baseline plus separate upload/download
+rate evidence. The fixed-runtime, crash-persistence, and browser-escape
+matrices are not complete, so the spike is not a supported app or
+release-ready transport.
 
 Start with:
 

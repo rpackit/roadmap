@@ -324,7 +324,18 @@ boundary as HTTP, with additional rules:
    Hyper, hyper-util, and Tokio versions in `Cargo.lock`.
 5. Propagate close and EOF in both directions and enforce idle, handshake,
    byte-rate, connection, and task limits so abandoned upgrades do not live
-   forever.
+   forever. Apply an independent maximum raw-byte token bucket to each
+   direction before its bytes are written to the opposite peer. WebSocket
+   framing bytes consume the same budget as payload bytes; do not parse frames
+   to exempt control traffic or infer application semantics. An empty bucket
+   must pause reads and rely on `copy_bidirectional` backpressure, never buffer
+   an unbounded message or release bytes beyond the available allowance.
+6. The default rate ceiling is 8 MiB/s per direction with one second of burst
+   capacity. A zero ceiling disables only rate shaping. When enabled, the burst
+   window must be nonzero and no longer than the activity-idle timeout;
+   invalid configuration must fail before proxy listeners bind. The existing
+   five-minute activity-idle deadline, connection semaphore, and tracked-task
+   shutdown remain independent bounds.
 
 Cookie delivery on a real WebView2 WebSocket handshake is an acceptance test,
 not an assumption derived from ordinary HTTP cookie behavior.
@@ -451,8 +462,8 @@ Tauri, wry, WebView2, Hyper, hyper-util, and Tokio minima are then pinned in
 the template and native metadata, together with the tested Windows OS
 baseline. A development-runtime pass alone is not Phase 1 completion. Open
 work includes the reviewed fixed minimum runtime, forced-crash
-profile-persistence, real browser escape-path attempts, WebSocket byte-rate
-abuse, and the complete fixed-runtime rerun. Strict
+profile-persistence, real browser escape-path attempts, and the complete
+fixed-runtime rerun. Strict
 upstream response-head validation passes valid raw HTTP and WebSocket
 baselines plus 16 HTTP and 16 WebSocket malformed or policy-unsafe cases over
 real loopback. Every rejected case returns the exact fixed secret-free 502
@@ -513,9 +524,22 @@ WebView2 report includes these booleans and counters. The recorded
 `150.0.4078.99` run passed the complete matrix and forwarded zero decoded
 bytes from the expansion case.
 
-WebSocket activity-idle shutdown and Windows exact-loopback routing under IPv4
-wildcard, IPv6 v6-only wildcard, and IPv6 dual-stack wildcard overlap are
-covered by the development-runtime harness.
+WebSocket activity-idle shutdown and independent bidirectional byte-rate
+backpressure are covered by the development-runtime harness. The rate probe
+first completes a small authenticated baseline, then sends a 100-byte
+application payload separately in each direction under a 100 B/s ceiling and
+100 ms burst window. Each directional exchange must take at least 750 ms and
+finish before the four-second deadline. All three upstream handshakes must
+carry one valid synthetic `S`, use the normalized upgrade shape, and leak
+neither `P` nor `B`.
+
+The recorded WebView2 `150.0.4078.99` debug and release runs both passed at
+997 ms client-to-upstream and 934 ms upstream-to-client, with 3/3 valid
+normalized handshakes and zero credential leakage.
+
+Windows exact-loopback routing under IPv4 wildcard, IPv6 v6-only wildcard, and
+IPv6 dual-stack wildcard overlap is covered by the same development-runtime
+harness.
 The same dual-stack contender is tested against exact IPv4 and exact IPv6.
 Wildcard bind success is not itself a failure: all four traffic paths must
 reach the exact proxies and every wildcard accept count must remain zero.
