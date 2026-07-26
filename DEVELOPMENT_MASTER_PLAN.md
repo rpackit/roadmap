@@ -242,15 +242,17 @@ User opens desktop app
   ↓
 Tauri shell starts
   ↓
-bundled Rscript starts launcher.R
+native runtime owner starts protocol-2 launcher.R
   ↓
 launcher.R starts shiny::runApp()
   ↓
 Shiny listens on 127.0.0.1 random port
   ↓
-Tauri WebView opens local app URL with token
+native loopback proxy bootstraps the WebView with B and host-only cookie P
   ↓
-closing app kills R process
+WebView opens the random proxy origin; the proxy injects S upstream
+  ↓
+closing app performs bounded native process-tree cleanup
 ```
 
 Key requirements:
@@ -260,7 +262,8 @@ No system R required for end user
 No manual package installation required for end user
 No public network binding
 Random localhost port
-Session token
+Independent native secrets S, P, and one-time bootstrap secret B
+No credential in a URL, JavaScript, command line, or generated resource
 Process cleanup on exit
 Clear error UI if app fails to launch
 ```
@@ -582,19 +585,16 @@ portable-r-macos/
 
 ## 8.7 `rpackit-tauri`
 
-Tauri templates.
+Security-critical native transport and future maintained Tauri templates.
 
 ```text
 rpackit-tauri/
-  templates/
-    shiny-portable/
-    shiny-static/
-  frontend/
-    launcher.js
-    loading.html
-    error.html
-  src-tauri/
-    minimal-main.rs
+  crates/
+    transport/
+    transport-testkit/
+  apps/
+    windows-spike/
+  templates/              # future generated-project templates
   AGENTS.md
 ```
 
@@ -937,15 +937,16 @@ server Docker build context/image
 
 ```text
 build/
+  dist/
+    index.html
   src-tauri/
-    src/main.rs
+    src/
+      main.rs
+      lifecycle.rs
+      secure_proxy.rs
+      secrets.rs
     tauri.conf.json
     capabilities/
-  frontend/
-    index.html
-    launcher.js
-    loading.html
-    error.html
   resources/
     R/
     app/
@@ -963,17 +964,25 @@ User opens desktop app
   ↓
 Tauri shell starts
   ↓
-launcher.js starts bundled Rscript
+native Rust owner implements launcher protocol 2 and starts bundled Rscript
   ↓
 launcher.R starts shiny::runApp()
   ↓
 Shiny listens on 127.0.0.1 random port
   ↓
-Tauri WebView opens local URL with token
+authenticated native loopback proxy binds a random .localhost origin
+  ↓
+native WebView2 request sends one-time bootstrap header B
+  ↓
+bootstrap HTTP response creates host-only HttpOnly cookie P
+  ↓
+WebView opens the proxy origin without a credential in the URL
+  ↓
+proxy authenticates P and injects Shiny-Shared-Secret S upstream
   ↓
 User interacts with app
   ↓
-Closing window kills R process
+Closing window performs graceful then Job Object-backed cleanup
 ```
 
 ## 11.3 Security Requirements
@@ -981,7 +990,11 @@ Closing window kills R process
 ```text
 Bind only to 127.0.0.1
 Use random port
-Use random token
+Generate independent S, P, B, and random hostname nonce N
+Write S only through the private one-time token file
+Keep S outside the WebView; keep P and B out of application JavaScript
+Never put a credential in a URL
+Authenticate every HTTP and WebSocket request at the native proxy
 Never bind 0.0.0.0
 Kill R process on exit
 Show readable errors if R fails
@@ -994,7 +1007,8 @@ Do not expose arbitrary local file paths to frontend
 Rscript resources/launcher.R \
   --app resources/app \
   --port <random_port> \
-  --token <random_token>
+  --token-file <private_one_time_path> \
+  [--control <private_control_path>]
 ```
 
 ## 11.5 `launcher.R` Responsibilities
@@ -1002,10 +1016,12 @@ Rscript resources/launcher.R \
 ```text
 parse args
 set .libPaths() to bundled runtime library
+consume and delete the private token file before app or port validation
 validate app directory
+set Shiny-Shared-Secret from S
 start shiny::runApp()
 host=127.0.0.1
-write readiness signal
+emit protocol-2 NDJSON lifecycle events, including post-bind listening
 write logs
 exit cleanly
 ```
@@ -1661,7 +1677,7 @@ resources/
 ## 19.3 Desktop Launcher Contract
 
 ```text
-launcher.R --app <path> --port <port> --token <token>
+launcher.R --app <path> --port <port> --token-file <path> [--control <path>]
 ```
 
 ## 19.4 Artifact Naming Contract

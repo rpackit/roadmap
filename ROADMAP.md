@@ -12,7 +12,7 @@ native build API or artifact already exists.
 | Target | Inspection or planning | Implemented output |
 |---|---|---|
 | Portable desktop resources | Implemented | Versioned resource bundle with portable R and authenticated managed Shiny lifecycle |
-| Native Tauri desktop app | Toolchain readiness only | Not yet implemented |
+| Native Tauri desktop app | Phase 1 transport spike in progress | No generated app or installer |
 | Static web | Compatibility assessment only | Builder not yet implemented |
 | Dynamic server | Compatibility assessment only | Builder not yet implemented |
 
@@ -95,14 +95,15 @@ launch state in native memory. Its transport is an authenticated loopback
 reverse proxy: it keeps the Shiny secret out of the WebView and separately
 authenticates the WebView before forwarding HTTP or WebSocket traffic. A bare
 loopback proxy and a direct interceptor are not accepted substitutes. See
-transport contract version `1` in `TAURI_SECURE_TRANSPORT.md`.
+transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
 
 ## Ordered next work
 
 1. [ ] Prove the authenticated native loopback reverse proxy in a Windows Tauri
-       transport spike, including bootstrap/HttpOnly-cookie authentication,
-       HTTP/subresource/fetch/WebSocket coverage, redirect isolation, and every
-       hard gate in `TAURI_SECURE_TRANSPORT.md`.
+       transport spike, including one-time `B` bootstrap and host-only
+       HttpOnly `P` cookie authentication, HTTP/subresource/fetch/WebSocket
+       coverage, redirect isolation, and every hard gate in
+       `TAURI_SECURE_TRANSPORT.md`.
 2. [ ] Integrate the protocol-2 launcher, Windows Job Object ownership, and
        deterministic cleanup, then generate the maintained Tauri project around
        the validated resource contract.
@@ -110,6 +111,18 @@ transport contract version `1` in `TAURI_SECURE_TRANSPORT.md`.
        on a clean machine without system R.
 4. [ ] Generate a release workflow that publishes the verified native artifact,
        checksum, signing status, and build provenance.
+
+Phase 1 progress is tracked in
+[`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri). Its pre-release
+Windows harness now implements the three-secret `S`/`P`/`B` transport and has
+exercised authenticated bootstrap, host-only cookie delivery, HTTP assets and
+fetches, streaming, redirects, WebSocket traffic, cross-instance isolation,
+and leakage checks on the current development WebView2 runtime. Phase 1
+remains unchecked: the reviewed fixed minimum WebView2 runtime,
+forced-crash profile persistence, browser escape-path attempts,
+HTTP/WebSocket resource-abuse and malformed-upstream cases, and Windows
+wildcard-listener overlap are not all resolved. The spike is not a generated
+application or supported installer.
 
 ## Later targets
 

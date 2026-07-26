@@ -154,28 +154,41 @@ discard it after use.
 A generated Tauri application does not call this function or serialize its
 returned Shiny secret across an R/native IPC boundary. The generated
 executable is the runtime owner: it implements launcher protocol 2 directly,
-creates the Shiny credential and an independent proxy-session credential,
-writes the Shiny credential only through the one-time private token file, and
-retains equivalent launch state only in native memory.
+creates independent upstream Shiny secret `S`, proxy-session secret `P`, and
+one-time bootstrap secret `B`, writes `S` only through the one-time private
+token file, and retains equivalent launch state only in native memory.
 
-Its browser transport is an authenticated native loopback reverse proxy. A
-static same-origin bootstrap installs the proxy credential as an HttpOnly
-WebView cookie under a mandatory isolated per-launch profile. Cookie scope and
-non-persistence are acceptance gates rather than assumptions about a wrapper
-API. The proxy authenticates every non-bootstrap HTTP request and WebSocket
-upgrade before dialing the fixed upstream, removes browser-supplied protected
-and forwarding headers, and injects exactly one upstream Shiny credential as
-the final request mutation. The Shiny credential never enters the WebView, and
-the proxy-session credential is never sent upstream. A bare unauthenticated
-proxy and a direct request interceptor are not accepted implementations.
+Its browser transport is an authenticated native loopback reverse proxy.
+Native WebView2 code constructs exactly one request to the fixed bootstrap
+route with `X-Rpackit-Bootstrap: B`. The proxy validates and atomically
+consumes `B`, never dials upstream, and returns a fixed document with
+`Set-Cookie: rpackit_proxy_v1=P; Path=/; HttpOnly; SameSite=Strict` and no
+`Domain`, `Expires`, or `Max-Age`. The HTTP stack therefore creates a host-only
+session cookie under the mandatory isolated per-launch profile. Missing,
+wrong, duplicated, malformed, or replayed `B` sets no cookie and fails closed.
+Cookie scope and non-persistence are acceptance gates rather than assumptions
+about a wrapper API.
+
+The proxy authenticates every non-bootstrap HTTP request and WebSocket upgrade
+with `P` before dialing the fixed upstream, removes browser-supplied protected
+and forwarding headers, and injects exactly one `Shiny-Shared-Secret: S` as the
+final request mutation. `S` never enters the WebView, `P` is never sent
+upstream, and `B` is accepted only for the one bootstrap request. A bare
+unauthenticated proxy and a direct request interceptor are not accepted
+implementations.
 
 The native proxy never follows redirects, never forwards the protected header
 externally, and fails closed on missing or ambiguous authentication, host,
 origin, framing, upgrade, or resource-limit state. Transport contract version
-`1`, including bootstrap, HTTP/WebSocket, leakage, lifecycle, and acceptance
+`2`, including bootstrap, HTTP/WebSocket, leakage, lifecycle, and acceptance
 rules, is specified in `TAURI_SECURE_TRANSPORT.md`. Future generated native
 metadata records that contract version plus the template and pinned
-Tauri/wry/WebView2 minima. The implementation is not yet delivered.
+Tauri/wry/WebView2 minima. The pre-release
+[`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri) Phase 1 spike
+implements this boundary and has development-runtime evidence, but the complete
+fixed-runtime, crash-persistence, browser-escape, resource-abuse,
+malformed-upstream, and listener-overlap matrix remains open. It is not a
+generated application, supported installer, or release-ready transport.
 
 Directory-app `DisplayMode` and `IncludeWWW` `DESCRIPTION` semantics remain
 active under the authenticated wrapper. Any incomplete private-file cleanup

@@ -81,13 +81,22 @@ The threat model excludes malicious same-user processes, administrator or
 debugger access, and untrusted app or package code inside the credential-
 bearing R process. Loopback HTTP is not TLS. The selected Tauri transport is an
 authenticated native loopback reverse proxy, not a direct WebView interceptor.
-It holds the upstream Shiny secret outside the browser and separately
-authenticates the WebView with an HttpOnly, per-launch proxy-session cookie
-before forwarding either HTTP or WebSocket traffic. A bare unauthenticated
-proxy would collapse the existing loopback-client boundary. The complete
-threat model and forwarding invariants are transport contract version `1` in
-`TAURI_SECURE_TRANSPORT.md`. Cookie scope and persistence remain hard
-acceptance gates for the Windows spike.
+It creates independent upstream secret `S`, proxy-session secret `P`, and
+one-time bootstrap secret `B`. Native WebView2 code sends `B` only on the exact
+bootstrap request; the fixed HTTP response creates host-only HttpOnly cookie
+`P`, and the proxy injects `S` only after `P` authenticates later HTTP or
+WebSocket traffic. A bare unauthenticated proxy would collapse the existing
+loopback-client boundary. The complete threat model and forwarding invariants
+are transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
+
+The pre-release
+[`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri) Windows spike
+implements this boundary and has current-development-runtime evidence. Cookie
+scope and clean profile recreation are empirical gates, not wrapper
+assumptions. A reviewed fixed minimum WebView2 runtime, forced-crash
+profile-persistence result, browser escape attempts, resource-abuse and
+malformed-upstream cases, and the Windows wildcard-listener overlap gate are
+still required before Phase 1 can complete.
 
 `doctor()` may report that the external Tauri toolchain is ready on a machine.
 That diagnostic does not mean project generation, a native build API, or a
@@ -109,6 +118,8 @@ Shiny application
 The project deliberately uses target-specific runtimes. A browser build cannot
 silently fall back to a native server, and a desktop build must not depend on a
 system R installation. Backend network-token enforcement is implemented. The
-authenticated Tauri reverse proxy, bootstrap/cookie flow, Windows process-tree
-ownership, native packaging, static-web builder, and server builder remain
-target work rather than current exported capabilities.
+authenticated Tauri reverse proxy and bootstrap/cookie flow now have a
+pre-release Phase 1 spike, but real launcher integration, Windows process-tree
+ownership, project generation, native packaging, the static-web builder, and
+the server builder remain target work rather than current exported
+capabilities.

@@ -1,17 +1,19 @@
 # Tauri Secure Transport
 
-**Status:** accepted architecture for the next native-desktop milestone
+**Status:** accepted architecture with a pre-release Windows transport spike
 
-**Transport contract version:** `1`
+**Transport contract version:** `2`
 
 **Last reviewed:** 2026-07-26
 
 This document specifies how a generated Tauri application implements the
 authenticated Shiny launcher protocol. It is a security contract and a release
-gate, not an implementation claim. No Tauri application or Rust proxy is
-currently delivered. The existing R-level `desktop_app_launch_config()` is a
-development and third-party handoff; it is not a secret-transport mechanism for
-the generated application.
+gate. The pre-release Windows Phase 1 reference spike lives in
+[`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri); it is an
+acceptance harness, not a generated application, supported installer, or
+release-ready transport. The existing R-level
+`desktop_app_launch_config()` is a development and third-party handoff; it is
+not a secret-transport mechanism for the generated application.
 
 ## Decision
 
@@ -19,16 +21,25 @@ The generated desktop application will use an **authenticated native loopback
 reverse proxy**. Direct WebView request-header injection is excluded from the
 baseline architecture.
 
-The browser-facing origin and the protected Shiny origin remain different:
+The browser-facing origin and the protected Shiny origin remain different. A
+third credential authenticates only the first native bootstrap navigation:
 
 ```text
+native shell
+  one exact bootstrap request with X-Rpackit-Bootstrap: B
+             |
+             v
+native loopback reverse proxy
+  fixed bootstrap response + host-only Set-Cookie for P
+             |
+             v
 Tauri WebView
   http://rpackit-<launch-nonce>.localhost:<proxy-port>
              |
-             | HttpOnly proxy-session cookie
+             | HttpOnly proxy-session cookie P
              v
 native loopback reverse proxy
-  fixed upstream + injected Shiny-Shared-Secret
+  fixed upstream + injected Shiny-Shared-Secret S
              |
              v
 protected Shiny server
@@ -67,9 +78,15 @@ versions; and the same end-to-end negative and leakage tests below pass. Until
 then, generator or platform code must not silently substitute an interceptor
 for the authenticated reverse proxy.
 
+Contract version 2 does use WebView2's native
+`NavigateWithWebResourceRequest` operation for the one fixed bootstrap
+navigation. That narrowly scoped operation carries `B` once; it is not a
+general request interceptor, does not carry `S`, and is never relied on for
+application documents, subresources, fetches, or WebSocket upgrades.
+
 ## Security boundary and secrets
 
-Each launch creates two independent 256-bit random values and an independent
+Each launch creates three independent 256-bit random values and an independent
 nonce of at least 128 random bits with the operating-system cryptographic
 random-number generator:
 
@@ -80,17 +97,21 @@ random-number generator:
 - `P`, the **proxy-session secret**, is held by the native process and the
   WebView cookie store. The browser sends it only as an HttpOnly session
   cookie to the exact proxy host. It is never sent upstream.
+- `B`, the **bootstrap secret**, is held by the native process and the proxy.
+  Native WebView2 code sends it in exactly one bootstrap request header. The
+  proxy compares and consumes it atomically; it never enters JavaScript, a
+  URL, a cookie, application content, or the upstream request.
 - `N`, the **launch nonce**, creates the random browser-facing hostname. It is
-  never derived from `S` or `P` and is not an authentication credential.
+  never derived from `S`, `P`, or `B` and is not an authentication credential.
 
-Neither secret may appear in JavaScript, URLs, command-line arguments,
+None of `S`, `P`, or `B` may appear in JavaScript, URLs, command-line arguments,
 environment variables, manifests, lifecycle events, resource files, log
 messages, errors, rpackit-generated crash annotations or output, or
 redaction-safe diagnostics. The native process should minimize copies, compare
 credentials without data-dependent early exit, and zeroize its in-memory
 copies on shutdown on a best-effort basis. Release builds must disable
 automatic collection or upload of memory-containing native or WebView crash
-dumps unless a tested scrubber can exclude both secrets.
+dumps unless a tested scrubber can exclude all three secrets.
 
 The preferred browser-facing host is a fresh
 `rpackit-<N>.localhost` name for every launch. Cookies are not
@@ -102,19 +123,28 @@ Resolution of the generated `.localhost` name, cookie scope and persistence,
 and WebSocket cookie behavior are hard end-to-end gates. There is no silent
 fallback to a stable loopback host if one of those gates fails.
 
-## Bootstrap and HttpOnly cookie flow
+## Authenticated bootstrap and HttpOnly cookie flow
 
-The proxy exposes exactly one unauthenticated resource:
-`GET` or `HEAD /__rpackit_bootstrap` with an empty query. Encoded, duplicated,
-dot-segment, slash-variant, or query-bearing forms are rejected rather than
-canonicalized.
+The proxy exposes exactly one route that is exempt from `P` authentication:
+`GET` or `HEAD /__rpackit_bootstrap` with an empty query. It is not
+unauthenticated. It requires exactly one `X-Rpackit-Bootstrap: B` header from
+the native request. Encoded, duplicated, dot-segment, slash-variant, or
+query-bearing forms are rejected rather than canonicalized.
 
-That route:
+After common admission, that route:
 
+- compares `B` without data-dependent early exit and atomically consumes it on
+  the one successful bootstrap request;
+- returns 401 for missing, wrong, malformed, duplicated, or replayed `B`,
+  without setting `P`, dialing upstream, or echoing any credential;
 - returns only a fixed, non-navigating loading document owned by rpackit;
 - returns no body for `HEAD`;
 - contains no application content, dynamic state, secret, or upstream data;
 - never dials the upstream server;
+- returns
+  `Set-Cookie: rpackit_proxy_v1=P; Path=/; HttpOnly; SameSite=Strict` with no
+  `Domain`, `Expires`, or `Max-Age`, so the WebView network stack creates a
+  host-only session cookie;
 - remains subject to the same exact-host, request-target, framing, header-size,
   connection, timeout, and secret-free-error rules as authenticated routes;
 - uses a restrictive Content Security Policy, `Referrer-Policy: no-referrer`,
@@ -126,16 +156,26 @@ The startup sequence is:
 1. Create the WebView hidden with a private, per-launch profile that is never
    reused. Incognito/private mode is preferred when the supported WebView API
    proves it behaves correctly.
-2. Navigate it to the exact proxy-origin bootstrap URL.
-3. After the bootstrap document is loaded, native Rust code uses the Tauri
-   cookie API to install `P` for the exact generated hostname with path `/`,
-   HttpOnly, `SameSite=Strict`, and no `Expires` or `Max-Age`. JavaScript is not
-   involved.
-4. Native code navigates the same WebView to `/`.
-5. Show the window only after the authenticated application root is ready.
+2. Native Rust code constructs one exact `GET` request for the proxy-origin
+   bootstrap URL with WebView2 `CreateWebResourceRequest`, adds only
+   `X-Rpackit-Bootstrap: B`, and invokes
+   `NavigateWithWebResourceRequest`. JavaScript and a general request
+   interceptor are not involved.
+3. The proxy validates and atomically consumes `B`, then returns the fixed
+   loading document and host-only `Set-Cookie` response above. `B` is never
+   forwarded or retained for another request.
+4. After the document loads, native code reads the cookie store and requires
+   exactly one matching `P` with host-only scope, path `/`, HttpOnly,
+   `SameSite=Strict`, and session lifetime.
+5. Native code navigates the same WebView normally to `/`.
+6. Show the window only after the authenticated application root is ready.
 
-Setting the cookie after a same-origin bootstrap avoids relying on a
-cross-site first navigation to carry a `SameSite=Strict` cookie. The proxy
+The HTTP response is the cookie-creation boundary. The Windows spike found
+that the high-level Tauri cookie setter did not establish a verifiable
+host-only cookie, consistent with WebView2's native cookie-manager operation
+requiring a specified domain when adding a cookie directly. A normal
+`Set-Cookie` response without `Domain` lets the WebView network stack create
+the required host-only cookie without exposing `P` to JavaScript. The proxy
 session cookie name is reserved to rpackit. The cookie is explicitly removed
 and the per-launch profile is cleared during normal shutdown; the random host
 prevents an old cookie from authenticating a later launch even after a crash.
@@ -176,7 +216,7 @@ The design must resist:
 - DNS, `Host`, absolute-URI, redirect, cookie, and request-header confusion;
 - use of the reverse proxy as an open or general forward proxy;
 - duplicate or smuggled authentication headers and cookies;
-- leakage of either secret through browser-visible state or generated
+- leakage of `S`, `P`, or `B` through browser-visible state or generated
   diagnostics;
 - startup races, graceful-close failures, crashes, child-process changes, and
   orphaned R descendants;
@@ -210,18 +250,19 @@ admission:
    and ambiguous cookie or authentication fields.
 3. Parse `Connection` tokens before stripping hop-by-hop fields. Reject a
    request if a token nominates `Host`, `Cookie`, `Origin`,
-   `Shiny-Shared-Secret`, framing fields, or another protected end-to-end
-   field. Strip all remaining hop-by-hop fields and their nominated fields
-   before any protected header is synthesized.
+   `Shiny-Shared-Secret`, `X-Rpackit-Bootstrap`, framing fields, or another
+   protected end-to-end field. Strip all remaining hop-by-hop fields and their
+   nominated fields before any protected header is synthesized.
 4. Enforce bounded request-line and header sizes, connection and task counts,
    body rates, idle and total timeouts, and startup deadlines. Error responses
    and logs are secret-free and do not echo untrusted fields without safe
    encoding.
 
 The exact bootstrap resource is exempt only from `P` authentication and
-upstream forwarding. After common admission it accepts only `GET` or `HEAD`,
-serves the fixed response described above, and closes without dialing the
-application.
+upstream forwarding; it still requires the one-time `B`. After common
+admission it accepts only `GET` or `HEAD`, validates and consumes `B`, serves
+the fixed response described above, and closes without dialing the
+application. `B` on any other route is rejected and never forwarded.
 
 Every other HTTP request must additionally satisfy all of the following:
 
@@ -237,10 +278,11 @@ Every other HTTP request must additionally satisfy all of the following:
    application cookies. Remove all inbound `Forwarded`, `X-Forwarded-*`,
    `X-Real-IP`, and `X-Original-*` fields; synthesize only a documented
    canonical value if Shiny demonstrably requires one.
-5. Remove every inbound `Shiny-Shared-Secret`, complete all hop-by-hop and
-   protected-field normalization, set the fixed upstream `Host`, and only then
-   inject exactly one `Shiny-Shared-Secret: S` as the final request mutation.
-   Assert that exactly one protected header exists before writing upstream.
+5. Reject every inbound bootstrap credential and remove every inbound
+   `Shiny-Shared-Secret`; complete all hop-by-hop and protected-field
+   normalization, set the fixed upstream `Host`, and only then inject exactly
+   one `Shiny-Shared-Secret: S` as the final request mutation. Assert that
+   exactly one protected header exists before writing upstream.
 6. Stream request and response bodies with bounded buffers and backpressure.
    Do not buffer an entire upload, download, or event stream.
 7. Strip response hop-by-hop fields with the same parse-before-strip rules. An
@@ -297,9 +339,9 @@ The generated Tauri executable is the runtime owner. On Windows it must:
    a system R installation.
 3. Create a per-launch session directory with a verified DACL limited to the
    current account and `SYSTEM`; create private token and control paths there.
-4. Generate independent `S`, `P`, and `N`; bind exclusive compatible loopback
-   proxy listeners; prove `rpackit-<N>.localhost` resolves only to those
-   loopback families; and select the upstream port under the launcher
+4. Generate independent `S`, `P`, `B`, and `N`; bind exclusive compatible
+   loopback proxy listeners; prove `rpackit-<N>.localhost` resolves only to
+   those loopback families; and select the upstream port under the launcher
    contract. Write `S` only to the one-time private token file.
 5. Create an unnamed Job Object with a non-inheritable handle. Set
    `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE` before process assignment, do not set
@@ -371,7 +413,7 @@ JavaScript shell, filesystem, arbitrary HTTP, or secret-bearing custom command
 is exposed, and the global Tauri JavaScript object remains disabled.
 
 `rpackit-native.json` is generated build metadata, separate from the existing
-schema-1 resource-bundle manifest. It records transport contract version `1`,
+schema-1 resource-bundle manifest. It records transport contract version `2`,
 the template version, resource schema and launcher protocol versions, and the
 pinned minimum Tauri, wry, WebView2 runtime, and supported Windows versions. A
 generator refuses an unknown transport contract rather than treating it as
@@ -395,16 +437,24 @@ installer production remain a later orchestration layer.
 
 ### Phase 1: Windows transport spike
 
-Build a hidden Tauri test shell and mock upstream. Prove bootstrap/cookie
-authentication, document and subresource streaming, fetch/XHR, WebSocket
-upgrade, redirect handling, and negative-request behavior. This phase adds no
-public R API and produces no supported installer.
+The pre-release implementation in
+[`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri) contains a hidden
+Tauri test shell, authenticated loopback proxy, and mock upstream. Its current
+development-runtime evidence exercises the one-time `B` bootstrap, host-only
+`P`, document and subresource streaming, fetch/XHR, WebSocket upgrade,
+redirect isolation, and negative-request behavior. This phase adds no public R
+API and produces no supported installer.
 
 Exit requires every transport and leakage gate below to pass on the minimum
 supported WebView2 runtime as well as the development runtime. The passing
 Tauri, wry, WebView2, Hyper, hyper-util, and Tokio minima are then pinned in
 the template and native metadata, together with the tested Windows OS
-baseline.
+baseline. A development-runtime pass alone is not Phase 1 completion. Open
+work includes the reviewed fixed minimum runtime, forced-crash
+profile-persistence, real browser escape-path attempts, HTTP idle/body-rate and
+WebSocket byte-rate abuse, the complete malformed-upstream matrix, and the
+known Windows wildcard-listener overlap case. WebSocket activity-idle shutdown
+is already covered by the spike's deterministic suite.
 
 ### Phase 2: real launcher lifecycle
 
@@ -414,6 +464,13 @@ forced termination, cleanup, and crash recovery in a development executable.
 
 Exit requires repeated start/stop and forced-crash tests with no surviving R
 wrapper or runtime process and no reusable credential.
+
+Phase 1 owns transport, browser, cookie/profile, leakage, and mock-upstream
+gates. Phase 2 owns launcher protocol 2, Job Object/process-tree, readiness,
+and real-R lifecycle gates, while re-running the Phase 1 transport gates
+against the real launcher. A Phase 2 lifecycle item does not retroactively
+block recording a Phase 1 development-gate result, but neither phase may be
+called complete until all gates assigned to it pass.
 
 ### Phase 3: generated native project
 
@@ -431,22 +488,25 @@ build provenance, dependency/runtime versions, and explicit signing status.
 Exit requires reproduction from the recorded inputs and verification of every
 published checksum and attestation.
 
-### Non-negotiable transport and leakage gates
+### Non-negotiable Phase 1 transport and leakage gates
 
-All phases that exercise the transport must prove:
+Phase 1, and every later phase that exercises the transport, must prove:
 
+- missing, wrong, duplicated, malformed, or replayed `B` fails the bootstrap
+  before `P` is set or the upstream observes a connection; exactly one valid
+  bootstrap succeeds, and `B` is rejected on every other route;
 - missing, wrong, duplicated, or malformed `P` fails for HTTP and WebSocket
   before the upstream observes a connection or application session;
 - initial navigation, CSS, JavaScript, images, XHR/fetch, streaming responses,
   and WebSocket handshakes make the upstream observe exactly one correct `S`;
 - `document.cookie` cannot read `P`, and browser JavaScript cannot observe
-  either secret;
+  `S`, `P`, or `B`;
 - URL/history, process arguments, environment, manifests, lifecycle events,
   logs, errors, rpackit-generated crash annotations/output, and generated
-  resources contain neither secret; automated memory-dump collection/upload
-  is disabled unless independently proven secret-free;
-- an external redirect/test collector receives neither secret nor the proxy
-  cookie;
+  resources contain none of `S`, `P`, or `B`; automated memory-dump
+  collection/upload is disabled unless independently proven secret-free;
+- an external redirect/test collector receives none of `S`, `P`, `B`, or the
+  proxy cookie;
 - malformed bootstrap variants, `CONNECT`, `TRACE`, non-WebSocket upgrades,
   `h2c`, absolute/authority-form targets, incorrect `Host`, absent or
   cross-origin unsafe-request `Origin`, protected `Connection` tokens,
@@ -463,7 +523,13 @@ All phases that exercise the transport must prove:
 - ordinary navigation, new-window/popup, custom-scheme, download, devtools,
   extension, and remote-debugging escape paths satisfy their independent
   deny-by-default policies;
-- concurrent application instances cannot authenticate to each other's proxy;
+- concurrent application instances cannot authenticate to each other's proxy,
+  and listener/port takeover attempts fail closed.
+
+### Non-negotiable Phase 2 lifecycle gates
+
+Phase 2 and later native-runtime phases must additionally prove:
+
 - graceful close, forced close, shell crash, launcher crash, and readiness
   timeout leave no orphan process, listener, credential, or reusable profile;
   PID reuse, port takeover, wrapper exit, failed Job assignment, inherited
@@ -484,6 +550,10 @@ fallback.
 - [wry `WebView`](https://docs.rs/wry/latest/wry/struct.WebView.html)
 - [WebView2: custom management of network requests](https://learn.microsoft.com/en-us/microsoft-edge/webview2/how-to/webresourcerequested)
 - [WebView2 resource contexts](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/winrt/microsoft_web_webview2_core/corewebview2webresourcecontext)
+- [WebView2 custom navigation with `CreateWebResourceRequest` and `NavigateWithWebResourceRequest`](https://learn.microsoft.com/en-us/microsoft-edge/webview2/how-to/webresourcerequested#constructing-a-custom-request-and-navigating-using-that-request)
+- [RFC 6761 section 6.3: `.localhost` and its subdomains](https://www.rfc-editor.org/rfc/rfc6761.html#section-6.3)
+- [Chromium: always treat `.localhost` as loopback](https://chromium.googlesource.com/chromium/src/+/5d131a1fd9b808c5fd08c45f8299e669b13ec393%5E%21/)
+- [Microsoft: WebView2 uses the Edge/Chromium runtime](https://learn.microsoft.com/en-us/microsoft-edge/webview2/)
 - [WebView2 `ICoreWebView2CookieManager`](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2cookiemanager)
 - [WebView2 `ICoreWebView2Cookie`](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2cookie)
 - [WebView2Feedback issue 4303: WebSocket interception](https://github.com/MicrosoftEdge/WebView2Feedback/issues/4303)

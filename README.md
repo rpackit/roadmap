@@ -15,14 +15,19 @@ manifests declare this authentication and set
 inspectable but cannot be launched.
 
 This is the authenticated backend contract, not yet a complete native desktop
-application. The next desktop milestone is an authenticated native loopback
-reverse proxy in a Tauri shell. It authenticates the WebView separately, then
-applies the protected header to navigation, subresources, and WebSocket
-upgrades without exposing it to browser JavaScript. Direct request interception
-and an unauthenticated proxy are excluded from the accepted design. The
-generated executable owns protocol-2 launch state directly rather than
-serializing an R-returned secret; transport contract version `1` defines the
-hard acceptance gates.
+application. The pre-release
+[`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri) Phase 1 spike
+implements the selected authenticated native loopback reverse proxy. Native
+code uses a third, one-time secret for the exact bootstrap request; the HTTP
+response creates a host-only HttpOnly proxy-session cookie, and the proxy
+injects the separate Shiny secret only after authenticating later document,
+subresource, fetch, and WebSocket traffic. Direct request interception and an
+unauthenticated proxy are excluded from the accepted design. The generated
+executable will own protocol-2 launch state directly rather than serializing an
+R-returned secret. Transport contract version `2` defines the hard acceptance
+gates. The fixed-runtime, crash-persistence, browser-escape, resource-abuse,
+malformed-upstream, and listener-overlap matrix remains open, so the spike is
+not a supported app or release-ready transport.
 
 Start with:
 
