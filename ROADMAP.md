@@ -158,11 +158,19 @@ proxy-enforced isolation. `204` rejects `Content-Length` or
 `Transfer-Encoding` to avoid ambiguous stream/trailer framing; and the
 `HEAD`/`204`/`205`/`304` body policy permits no streamed bytes. The byte cap
 counts the proxied, encoded HTTP body; `Content-Encoding` decompression
-expansion remains an open resource-abuse gate. Phase 1 remains unchecked: the
-reviewed fixed minimum WebView2 runtime, forced-crash profile persistence,
-browser escape-path attempts, and HTTP/WebSocket resource-abuse limits are not
-all resolved. The spike is not a generated application or supported
-installer.
+expansion remains an open response resource-abuse gate. Authenticated request
+uploads now pass a separate real-loopback matrix for total bytes, idle gaps,
+minimum sustained rate, total duration, and request trailers: one immediate
+bounded upload succeeds; a chunked upload stops before crossing a small test
+byte cap; independent idle, below-rate, and over-duration uploads terminate
+without a success response; and a parsed chunked trailer becomes a fixed
+`502`. The development WebView2 report records all six results, 5/5 bounded
+negative terminations, 5/5 valid parsed upstream credentials, and zero
+request-probe credential leaks. Phase 1 remains unchecked: the reviewed fixed
+minimum WebView2 runtime, forced-crash profile persistence, browser escape-path
+attempts, response-body idle/rate and decompression expansion, and WebSocket
+byte-rate limits are not all resolved. The spike is not a generated application
+or supported installer.
 
 ## Later targets
 

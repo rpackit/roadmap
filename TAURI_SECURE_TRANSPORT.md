@@ -451,8 +451,9 @@ Tauri, wry, WebView2, Hyper, hyper-util, and Tokio minima are then pinned in
 the template and native metadata, together with the tested Windows OS
 baseline. A development-runtime pass alone is not Phase 1 completion. Open
 work includes the reviewed fixed minimum runtime, forced-crash
-profile-persistence, real browser escape-path attempts, HTTP idle/body-rate and
-WebSocket byte-rate abuse, and the complete fixed-runtime rerun. Strict
+profile-persistence, real browser escape-path attempts, response-body
+idle/rate and decompression-expansion abuse, WebSocket byte-rate abuse, and the
+complete fixed-runtime rerun. Strict
 upstream response-head validation passes valid raw HTTP and WebSocket
 baselines plus 16 HTTP and 16 WebSocket malformed or policy-unsafe cases over
 real loopback. Every rejected case returns the exact fixed secret-free 502
@@ -482,6 +483,17 @@ even an empty chunked `205` avoids ambiguous stream/trailer framing on a
 status that must not carry content. The configured byte cap applies to the
 proxied, encoded HTTP body; `Content-Encoding` decompression expansion remains
 part of the open resource-abuse gate.
+Authenticated downstream request uploads separately enforce total bytes,
+non-empty-frame idle time, a minimum throughput in every complete rate window,
+total duration, and no trailers before bytes reach the fixed upstream. The
+default limits are 64 MiB, 15 seconds idle, 1 KiB/s per complete 5-second
+window, and 5 minutes total. A headless real-loopback matrix proves one
+immediate valid upload plus independent streamed byte-cap, idle, below-rate,
+over-duration, and parsed-trailer fail-closed terminations. Small bodies that
+complete before a rate window ends are not subject to a minimum-size rule. The
+development WebView2 report includes the six result booleans and secret-free
+counters: 5/5 bounded negative terminations, 5/5 valid parsed upstream
+credentials, and zero request-probe credential leaks.
 WebSocket activity-idle shutdown and Windows exact-loopback routing under IPv4
 wildcard, IPv6 v6-only wildcard, and IPv6 dual-stack wildcard overlap are
 covered by the development-runtime harness.

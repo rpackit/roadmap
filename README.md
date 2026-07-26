@@ -35,11 +35,13 @@ gates. Listener-overlap plus the strict malformed response-head and streamed
 response-body/trailer matrices now pass on the development runtime. The body
 matrix includes correct bodyless `HEAD`/`204`/`205`/`304` semantics, excess
 trailer fields, close-delimited overflow, and keep-alive reuse attempts after
-every raw case. Its byte cap applies to the proxied, encoded HTTP body;
-`Content-Encoding` decompression expansion remains in the open resource-abuse
-matrix. The fixed-runtime, crash-persistence, browser-escape, and
-resource-abuse matrices remain open, so the spike is not a supported app or
-release-ready transport.
+every raw case. Authenticated request uploads now also have tested byte, idle,
+minimum-rate, total-time, and trailer limits. The response byte cap applies to
+the proxied, encoded HTTP body; response idle/rate,
+`Content-Encoding` decompression expansion, and WebSocket byte-rate abuse
+remain open. The fixed-runtime, crash-persistence, browser-escape, and
+remaining resource-abuse matrices are not complete, so the spike is not a
+supported app or release-ready transport.
 
 Start with:
 
