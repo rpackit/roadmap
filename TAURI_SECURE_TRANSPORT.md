@@ -206,14 +206,17 @@ those controls.
 
 The Windows reference harness proves these as active independent controls. Its
 page attempts an external top-level document, popup, download, and `mailto:`
-launch. A separate native probe selects only URI schemes registered with
-Windows and requires a native-origin `LaunchingExternalUriScheme` event; it
-does not assume that a mail client is installed. A credential-free
-`WebResourceRequested` document filter permits only the proxy origin and
-bundled placeholder and replaces external HTTP or HTTPS documents with a
-local `403` before network access. New windows are denied, downloads are
-cancelled into a launch-private directory that must remain empty, and every
-observed external-scheme event is cancelled.
+launch. A separate native probe creates a random per-run URL protocol in a
+volatile current-user registry key. Its handler is the same executable in a
+strictly scoped canary mode and is self-tested before native `Navigate`
+requests the exact custom URI. The harness requires one native-origin
+`LaunchingExternalUriScheme` event, cancels it, proves that the handler canary
+was not launched, then removes the registration and verifies it is absent. A
+credential-free `WebResourceRequested` document filter permits only the proxy
+origin and bundled placeholder and replaces external HTTP or HTTPS documents
+with a local `403` before network access. New windows are denied, downloads
+are cancelled into a launch-private directory that must remain empty, and
+every observed external-scheme event is cancelled.
 
 Native readback must confirm devtools, browser accelerator keys, and default
 context menus disabled. With browser extensions disabled, installing a valid
@@ -484,10 +487,12 @@ baseline. A development-runtime pass alone is not Phase 1 completion. Open
 work includes the reviewed fixed minimum runtime, forced-crash
 profile-persistence, and the complete fixed-runtime rerun. The active
 browser-escape matrix passes on the development runtime with one blocked
-external document request, one popup denial, one download cancellation, two
-external-scheme cancellations, verified native settings and extension
-rejection, absent override sources and `DevToolsActivePort`, and zero external
-collector requests. Strict
+external document request, one popup denial, one download cancellation, and
+one cancelled native-origin external-scheme event whose self-tested handler
+canary remained absent. The volatile protocol registration was removed;
+native settings and extension rejection were verified, override sources and
+`DevToolsActivePort` were absent, and external collectors received zero escape
+requests. Strict
 upstream response-head validation passes valid raw HTTP and WebSocket
 baselines plus 16 HTTP and 16 WebSocket malformed or policy-unsafe cases over
 real loopback. Every rejected case returns the exact fixed secret-free 502

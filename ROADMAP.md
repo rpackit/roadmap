@@ -190,8 +190,10 @@ runs both measured 997 ms client-to-upstream and 934 ms upstream-to-client.
 The active browser-escape matrix also passes on WebView2 `150.0.4078.99`.
 It records one external-document navigation callback and one request-layer
 network block, one popup denial, one download cancellation with an empty
-isolated directory, and two cancelled external-scheme events, including one
-native-origin attempt selected from URI schemes registered with Windows.
+isolated directory, and one cancelled native-origin external-scheme event. The
+scheme is a random per-run volatile current-user URL protocol whose
+same-executable handler is self-tested with a scoped canary; cancellation keeps
+the marker absent, and the registration is removed and verified absent.
 Native readback confirms devtools, browser accelerator keys, and default
 context menus disabled; a valid unpacked extension is explicitly rejected as
 unsupported; environment and machine/user policy-registry overrides are
