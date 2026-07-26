@@ -35,7 +35,10 @@ installer or Tauri application.
 - [x] Implement `check_app()`
 - [x] Implement non-executing dependency plans from R syntax, DESCRIPTION, and
       renv.lock
-- [x] Detect Shiny layouts, packages, renv, system calls, and static-web risks
+- [x] Detect Shiny layouts, packages, renv, parsed base system calls with
+      file-and-line evidence, and static-web risks
+- [x] Publish a runnable getting-started article from inspection and dependency
+      planning through resource validation and managed cleanup
 - [x] Require the actual Tauri CLI and native prerequisites before `doctor()`
       reports the Tauri toolchain as ready
 
@@ -121,11 +124,17 @@ and leakage checks on the current development WebView2 runtime. The listener
 gate also proves four exact-loopback traffic paths under three same-port
 contenders: IPv4 wildcard, IPv6 v6-only wildcard, and IPv6 dual-stack wildcard.
 All 32 probe requests reached the exact proxy and all wildcard accept counts
-were zero; bind success is recorded separately from interception. Phase 1
-remains unchecked: the reviewed fixed minimum WebView2 runtime,
-forced-crash profile persistence, browser escape-path attempts, and
-HTTP/WebSocket resource-abuse and malformed-upstream cases are not all
-resolved. The spike is not a generated application or supported installer.
+were zero; bind success is recorded separately from interception. Valid raw
+ordinary HTTP and WebSocket baselines also pass, including one safely tunneled
+WebSocket frame. Sixteen HTTP and 16 WebSocket malformed or policy-unsafe
+response heads all fail with the exact fixed secret-free 502 boundary; all 34
+upstream requests carry one valid synthetic credential, all 17 WebSocket
+requests have the normalized upgrade shape, and no marker, frame, or
+unexpected upgrade reaches downstream. Phase 1 remains unchecked: the reviewed
+fixed minimum WebView2 runtime, forced-crash profile persistence, browser
+escape-path attempts, HTTP/WebSocket resource-abuse limits, and malformed
+streamed-body matrix are not all resolved. The spike is not a generated
+application or supported installer.
 
 ## Later targets
 

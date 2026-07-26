@@ -452,10 +452,16 @@ the template and native metadata, together with the tested Windows OS
 baseline. A development-runtime pass alone is not Phase 1 completion. Open
 work includes the reviewed fixed minimum runtime, forced-crash
 profile-persistence, real browser escape-path attempts, HTTP idle/body-rate and
-WebSocket byte-rate abuse, the complete malformed-upstream matrix, and the
-complete fixed-runtime rerun. WebSocket activity-idle shutdown and Windows
-exact-loopback routing under IPv4 wildcard, IPv6 v6-only wildcard, and IPv6
-dual-stack wildcard overlap are covered by the development-runtime harness.
+WebSocket byte-rate abuse, malformed streamed-body and trailer cases, and the
+complete fixed-runtime rerun. Strict upstream response-head validation already
+passes valid raw HTTP and WebSocket baselines plus 16 HTTP and 16 WebSocket
+malformed or policy-unsafe cases over real loopback. Every rejected case
+returns the exact fixed secret-free 502 response without releasing an
+unvalidated head, attacker canary, or WebSocket frame downstream, and no
+negative case switches the downstream connection. WebSocket activity-idle
+shutdown and Windows exact-loopback routing under IPv4 wildcard, IPv6 v6-only
+wildcard, and IPv6 dual-stack wildcard overlap are covered by the
+development-runtime harness.
 The same dual-stack contender is tested against exact IPv4 and exact IPv6.
 Wildcard bind success is not itself a failure: all four traffic paths must
 reach the exact proxies and every wildcard accept count must remain zero.
