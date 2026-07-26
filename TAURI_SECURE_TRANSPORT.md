@@ -204,13 +204,16 @@ destination policy. Release builds disable devtools, context-menu escape
 features, extensions, and remote debugging wherever the pinned runtime exposes
 those controls.
 
-The Windows reference harness proves these as active independent controls. It
-attempts an external top-level document, popup, download, and `mailto:` launch.
-A credential-free `WebResourceRequested` document filter permits only the
-proxy origin and bundled placeholder and replaces external HTTP or HTTPS
-documents with a local `403` before network access. New windows are denied,
-downloads are cancelled into a launch-private directory that must remain
-empty, and every `LaunchingExternalUriScheme` event is cancelled.
+The Windows reference harness proves these as active independent controls. Its
+page attempts an external top-level document, popup, download, and `mailto:`
+launch. A separate native probe selects only URI schemes registered with
+Windows and requires a native-origin `LaunchingExternalUriScheme` event; it
+does not assume that a mail client is installed. A credential-free
+`WebResourceRequested` document filter permits only the proxy origin and
+bundled placeholder and replaces external HTTP or HTTPS documents with a
+local `403` before network access. New windows are denied, downloads are
+cancelled into a launch-private directory that must remain empty, and every
+observed external-scheme event is cancelled.
 
 Native readback must confirm devtools, browser accelerator keys, and default
 context menus disabled. With browser extensions disabled, installing a valid
@@ -660,6 +663,7 @@ fallback.
 - [WebView2: custom management of network requests](https://learn.microsoft.com/en-us/microsoft-edge/webview2/how-to/webresourcerequested)
 - [WebView2 resource contexts](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/winrt/microsoft_web_webview2_core/corewebview2webresourcecontext)
 - [WebView2 custom navigation with `CreateWebResourceRequest` and `NavigateWithWebResourceRequest`](https://learn.microsoft.com/en-us/microsoft-edge/webview2/how-to/webresourcerequested#constructing-a-custom-request-and-navigating-using-that-request)
+- [WebView2 `LaunchingExternalUriScheme`](https://learn.microsoft.com/en-us/microsoft-edge/webview2/reference/win32/icorewebview2_18)
 - [RFC 6761 section 6.3: `.localhost` and its subdomains](https://www.rfc-editor.org/rfc/rfc6761.html#section-6.3)
 - [Chromium: always treat `.localhost` as loopback](https://chromium.googlesource.com/chromium/src/+/5d131a1fd9b808c5fd08c45f8299e669b13ec393%5E%21/)
 - [Microsoft: WebView2 uses the Edge/Chromium runtime](https://learn.microsoft.com/en-us/microsoft-edge/webview2/)
