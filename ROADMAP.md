@@ -12,19 +12,17 @@ native build API or artifact already exists.
 | Target | Inspection or planning | Implemented output |
 |---|---|---|
 | Portable desktop resources | Implemented | Versioned resource bundle with portable R and authenticated managed Shiny lifecycle |
-| Native Tauri desktop app | Phase 1 complete; maintained native proxy/R/WebView owner verified; application generation is next | Verified development shell and complete real-R close lifecycle; no generated app or installer |
+| Native Tauri desktop app | Phases 1-3 complete; native packaging is next | Generated application-specific source compiles and passes the real-R/WebView lifecycle; no installer |
 | Static web | Compatibility assessment only | Builder not yet implemented |
 | Dynamic server | Compatibility assessment only | Builder not yet implemented |
 
-The currently runnable R-package sequence is
-`prepare_desktop()` → `validate_desktop_bundle()` →
-`start_desktop_app()` → `desktop_app_launch_config()` →
-`desktop_app_status()` → `stop_desktop_app()`. It produces executable
-resources and an authenticated native-shell handoff contract, not a native
-installer or generated Tauri application. `rpackit-tauri` separately contains
-a maintained development shell that owns the real proxy/R/WebView lifecycle;
-the generator does not yet stamp that shell with application resources and
-metadata.
+The currently runnable R-package sequence extends from
+`prepare_desktop()` and `validate_desktop_bundle()` through
+`generate_tauri_app()` and `validate_tauri_project()`. The generated project
+stamps the maintained native shell with application resources, identity,
+version, optional icon, and authenticated launch-contract metadata. The source
+compiles and passes the real proxy/R/WebView lifecycle gate, but it is not yet
+a native installer.
 
 ## Delivered foundation
 
@@ -156,9 +154,14 @@ transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
          [reviewed full-owner gate](https://github.com/rpackit/rpackit-tauri/actions/runs/30237185375)
          against published portable R 4.6.1 and pinned `hello-shiny`, including
          graceful R/proxy/Job/session cleanup and exact WebView profile removal.
-3. [ ] Generate the maintained Tauri project from one validated resource
+3. [x] Generate the maintained Tauri project from one validated resource
        bundle, including application-specific metadata, assets, and launch
        configuration.
+   - [x] Pass the
+         [generated-project gate](https://github.com/rpackit/rpackit/actions/runs/30239483026):
+         compile the generated `hello-shiny` source, run it through the native
+         owner, verify secret-free evidence, and remove runner-scoped runtime
+         and build storage.
 4. [ ] Package hello-shiny as a native Windows desktop executable and verify it
        on a clean machine without system R.
 5. [ ] Generate a release workflow that publishes the verified native artifact,
@@ -272,7 +275,11 @@ authenticated direct, proxied, and real WebView content, credential denial,
 graceful and forced close, owner drop, runtime crash, timeout/takeover,
 proxy/descendant Job cleanup, hostile-profile isolation, private-session
 cleanup, cookie deletion, window destruction, and exact profile removal.
-Phase 2 remains open for resource-driven application generation and packaging.
+Phase 2 is complete. Phase 3 now also generates and validates
+application-specific source from the versioned
+`windows-template-v1.0.0` template. The generated `hello-shiny` project
+compiles and passes the real released-R/WebView owner gate. Native executable
+packaging and clean-machine verification remain the next milestone.
 
 ## Later targets
 
