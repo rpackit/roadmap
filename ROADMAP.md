@@ -122,6 +122,11 @@ transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
    - [x] Add suspended process creation, explicit inherited-handle allowlisting,
          unnamed kill-on-close Job ownership, no-breakaway policy, and
          fail-before-execution assignment.
+   - [x] Add validated explicit Unicode child-environment construction with
+         case-insensitive replacement/removal, Windows ordering, exact
+         double-NUL serialization, Debug redaction, and zeroization so the
+         real-R owner can strip ambient R/rpackit configuration without
+         mutating the parent process.
    - [x] Capture reported runtime identity by PID plus creation time and verify
          its exact IPv4-loopback listener through Windows owner-PID tables.
    - [x] Atomically create protected current-account-plus-SYSTEM session,
@@ -232,12 +237,13 @@ lifecycle is Phase 2.
 
 Phase 2 now has independently tested native startup foundations in
 `rpackit-tauri`: strict schema-1 resource loading, protocol-2 decoding,
-suspended Job assignment, exact process/listener identity, and protected
-token/control files. These passing component tests are not yet a real-R
-lifecycle claim. Phase 2 remains open until the released portable runtime and
-`hello-shiny` pass authenticated readiness, graceful and forced close, shell
-and launcher crash, timeout/takeover, descendant cleanup, and profile/secret
-cleanup as one integrated executable.
+suspended Job assignment, explicit sanitized-environment construction, exact
+process/listener identity, and protected token/control files. These passing
+component tests are not yet a real-R lifecycle claim. Phase 2 remains open
+until the released portable runtime and `hello-shiny` pass authenticated
+readiness, graceful and forced close, shell and launcher crash,
+timeout/takeover, descendant cleanup, and profile/secret cleanup as one
+integrated executable.
 
 ## Later targets
 
