@@ -12,7 +12,7 @@ native build API or artifact already exists.
 | Target | Inspection or planning | Implemented output |
 |---|---|---|
 | Portable desktop resources | Implemented | Versioned resource bundle with portable R and authenticated managed Shiny lifecycle |
-| Native Tauri desktop app | Phase 1 transport spike in progress | No generated app or installer |
+| Native Tauri desktop app | Phase 1 complete; Phase 2 lifecycle integration in progress | Verified transport and native startup foundations; no generated app or installer |
 | Static web | Compatibility assessment only | Builder not yet implemented |
 | Dynamic server | Compatibility assessment only | Builder not yet implemented |
 
@@ -114,9 +114,22 @@ transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
        HttpOnly `P` cookie authentication, HTTP/subresource/fetch/WebSocket
        coverage, redirect isolation, and every hard gate in
        `TAURI_SECURE_TRANSPORT.md`.
-2. [ ] Integrate the protocol-2 launcher, Windows Job Object ownership, and
-       deterministic cleanup, then generate the maintained Tauri project around
-       the validated resource contract.
+2. [ ] Integrate the protocol-2 launcher and deterministic cleanup, then
+       generate the maintained Tauri project around the validated resource
+       contract.
+   - [x] Add strict non-executing schema-1/protocol-2 resource validation.
+   - [x] Add bounded protocol-2 event decoding and terminal sequence tracking.
+   - [x] Add suspended process creation, explicit inherited-handle allowlisting,
+         unnamed kill-on-close Job ownership, no-breakaway policy, and
+         fail-before-execution assignment.
+   - [x] Capture reported runtime identity by PID plus creation time and verify
+         its exact IPv4-loopback listener through Windows owner-PID tables.
+   - [x] Atomically create protected current-account-plus-SYSTEM session,
+         token, and control objects with exact DACL readback and non-recursive
+         cleanup.
+   - [ ] Drive those layers through a real bundled R launch, authenticated
+         readiness, graceful/forced shutdown, and repeated `hello-shiny`
+         lifecycle/crash matrices.
 3. [ ] Package hello-shiny as a native Windows desktop executable and verify it
        on a clean machine without system R.
 4. [ ] Generate a release workflow that publishes the verified native artifact,
@@ -216,6 +229,15 @@ WebSocket shaping measured 1,007/934 ms in Debug and 1,006/921 ms in Release,
 with 3/3 valid normalized handshakes and no credential leakage. The spike is
 still not a generated application or supported installer; real launcher
 lifecycle is Phase 2.
+
+Phase 2 now has independently tested native startup foundations in
+`rpackit-tauri`: strict schema-1 resource loading, protocol-2 decoding,
+suspended Job assignment, exact process/listener identity, and protected
+token/control files. These passing component tests are not yet a real-R
+lifecycle claim. Phase 2 remains open until the released portable runtime and
+`hello-shiny` pass authenticated readiness, graceful and forced close, shell
+and launcher crash, timeout/takeover, descendant cleanup, and profile/secret
+cleanup as one integrated executable.
 
 ## Later targets
 
