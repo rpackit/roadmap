@@ -5,23 +5,26 @@ implemented and verified at the scope stated here. Toolchain readiness means
 the required external tools are present; it does not mean a corresponding
 native build API or artifact already exists.
 
-**Last reviewed:** 2026-07-26
+**Last reviewed:** 2026-07-27
 
 ## Target maturity
 
 | Target | Inspection or planning | Implemented output |
 |---|---|---|
 | Portable desktop resources | Implemented | Versioned resource bundle with portable R and authenticated managed Shiny lifecycle |
-| Native Tauri desktop app | Phase 1 complete; native proxy/released-R composition verified; WebView shell integration in progress | Verified transport and combined native proxy/process lifecycle; no generated app or installer |
+| Native Tauri desktop app | Phase 1 complete; maintained native proxy/R/WebView owner verified; application generation is next | Verified development shell and complete real-R close lifecycle; no generated app or installer |
 | Static web | Compatibility assessment only | Builder not yet implemented |
 | Dynamic server | Compatibility assessment only | Builder not yet implemented |
 
-The currently runnable desktop sequence is
+The currently runnable R-package sequence is
 `prepare_desktop()` → `validate_desktop_bundle()` →
 `start_desktop_app()` → `desktop_app_launch_config()` →
 `desktop_app_status()` → `stop_desktop_app()`. It produces executable
 resources and an authenticated native-shell handoff contract, not a native
-installer or Tauri application.
+installer or generated Tauri application. `rpackit-tauri` separately contains
+a maintained development shell that owns the real proxy/R/WebView lifecycle;
+the generator does not yet stamp that shell with application resources and
+metadata.
 
 ## Delivered foundation
 
@@ -114,9 +117,8 @@ transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
        HttpOnly `P` cookie authentication, HTTP/subresource/fetch/WebSocket
        coverage, redirect isolation, and every hard gate in
        `TAURI_SECURE_TRANSPORT.md`.
-2. [ ] Integrate the protocol-2 launcher and deterministic cleanup, then
-       generate the maintained Tauri project around the validated resource
-       contract.
+2. [x] Integrate the protocol-2 launcher, deterministic cleanup, and maintained
+       native Tauri WebView shell around the validated resource contract.
    - [x] Add strict non-executing schema-1/protocol-2 resource validation.
    - [x] Add bounded protocol-2 event decoding and terminal sequence tracking.
    - [x] Add suspended process creation, explicit inherited-handle allowlisting,
@@ -145,9 +147,21 @@ transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
          `S`/`P`/`B` set, expose only native `P`/`B` launch handles after
          readiness, stop proxy traffic before forced cleanup, and pass both
          synthetic and released-R/`hello-shiny` composition gates.
-3. [ ] Package hello-shiny as a native Windows desktop executable and verify it
+   - [x] Add pre-R WebView2 identity/runtime/policy preflight, one hidden
+         hardened WebView with an exact per-launch profile, native `B`
+         bootstrap, exact `P` cookie verification, authenticated document
+         readiness, close interception, and bounded
+         cookie/browsing-data/window/profile cleanup.
+   - [x] Pass the
+         [reviewed full-owner gate](https://github.com/rpackit/rpackit-tauri/actions/runs/30237185375)
+         against published portable R 4.6.1 and pinned `hello-shiny`, including
+         graceful R/proxy/Job/session cleanup and exact WebView profile removal.
+3. [ ] Generate the maintained Tauri project from one validated resource
+       bundle, including application-specific metadata, assets, and launch
+       configuration.
+4. [ ] Package hello-shiny as a native Windows desktop executable and verify it
        on a clean machine without system R.
-4. [ ] Generate a release workflow that publishes the verified native artifact,
+5. [ ] Generate a release workflow that publishes the verified native artifact,
        checksum, signing status, and build provenance.
 
 Phase 1 progress is tracked in
@@ -245,20 +259,20 @@ with 3/3 valid normalized handshakes and no credential leakage. The spike is
 still not a generated application or supported installer; real launcher
 lifecycle is Phase 2.
 
-Phase 2 now has independently tested native startup foundations in
-`rpackit-tauri`: strict schema-1 resource loading, protocol-2 decoding,
-suspended Job assignment, explicit sanitized-environment construction, exact
-process/listener identity, protected token/control files, and an integrated
-synthetic lifecycle owner with authenticated readiness and deterministic
-cleanup. The
-[reviewed native-composition run](https://github.com/rpackit/rpackit-tauri/actions/runs/30234829826)
-also passed with the SHA-256-pinned portable R 4.6.1 Release and pinned
+Phase 2 now has independently tested native startup and application-owner
+foundations in `rpackit-tauri`: strict schema-1 resource loading, protocol-2
+decoding, suspended Job assignment, explicit sanitized-environment
+construction, exact process/listener identity, protected token/control files,
+an authenticated proxy/runtime owner, and a maintained Tauri
+WebView/window/profile owner. The
+[reviewed full-owner run](https://github.com/rpackit/rpackit-tauri/actions/runs/30237185375)
+passed with the SHA-256-pinned portable R 4.6.1 Release and pinned
 `hello-shiny`: native interpreter/package loading, one-time bootstrap,
-authenticated direct and proxied content, credential denial, graceful and
-forced close, owner drop, runtime crash, timeout/takeover, proxy/descendant Job
-cleanup, hostile-profile isolation, and private-session cleanup. This closes
-the real-R native proxy/process composition gate. Phase 2 remains open for
-WebView/window/profile ownership and generated application resources.
+authenticated direct, proxied, and real WebView content, credential denial,
+graceful and forced close, owner drop, runtime crash, timeout/takeover,
+proxy/descendant Job cleanup, hostile-profile isolation, private-session
+cleanup, cookie deletion, window destruction, and exact profile removal.
+Phase 2 remains open for resource-driven application generation and packaging.
 
 ## Later targets
 
