@@ -127,6 +127,11 @@ transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
          double-NUL serialization, Debug redaction, and zeroization so the
          real-R owner can strip ambient R/rpackit configuration without
          mutating the parent process.
+   - [x] Compose the native layers against an executable synthetic runtime:
+         token consumption, bounded pipes, exact runtime/listener ownership,
+         authenticated readiness, health polling, graceful/forced shutdown,
+         zero-active-Job accounting, owner-drop cleanup, negative gates, and
+         retryable preservation of unexpected audit entries.
    - [x] Capture reported runtime identity by PID plus creation time and verify
          its exact IPv4-loopback listener through Windows owner-PID tables.
    - [x] Atomically create protected current-account-plus-SYSTEM session,
@@ -238,10 +243,11 @@ lifecycle is Phase 2.
 Phase 2 now has independently tested native startup foundations in
 `rpackit-tauri`: strict schema-1 resource loading, protocol-2 decoding,
 suspended Job assignment, explicit sanitized-environment construction, exact
-process/listener identity, and protected token/control files. These passing
-component tests are not yet a real-R lifecycle claim. Phase 2 remains open
-until the released portable runtime and `hello-shiny` pass authenticated
-readiness, graceful and forced close, shell and launcher crash,
+process/listener identity, protected token/control files, and an integrated
+synthetic lifecycle owner with authenticated readiness and deterministic
+cleanup. These passing tests are not yet a real-R lifecycle claim. Phase 2
+remains open until the released portable runtime and `hello-shiny` pass
+authenticated readiness, graceful and forced close, shell and launcher crash,
 timeout/takeover, descendant cleanup, and profile/secret cleanup as one
 integrated executable.
 
