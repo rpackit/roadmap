@@ -12,7 +12,7 @@ native build API or artifact already exists.
 | Target | Inspection or planning | Implemented output |
 |---|---|---|
 | Portable desktop resources | Implemented | Versioned resource bundle with portable R and authenticated managed Shiny lifecycle |
-| Native Tauri desktop app | Phase 1 complete; Phase 2 lifecycle integration in progress | Verified transport and native startup foundations; no generated app or installer |
+| Native Tauri desktop app | Phase 1 complete; released-R Phase 2 owner verified; shell composition in progress | Verified transport and released-R process-owner lifecycle; no generated app or installer |
 | Static web | Compatibility assessment only | Builder not yet implemented |
 | Dynamic server | Compatibility assessment only | Builder not yet implemented |
 
@@ -137,7 +137,7 @@ transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
    - [x] Atomically create protected current-account-plus-SYSTEM session,
          token, and control objects with exact DACL readback and non-recursive
          cleanup.
-   - [ ] Drive those layers through a real bundled R launch, authenticated
+   - [x] Drive those layers through a real bundled R launch, authenticated
          readiness, graceful/forced shutdown, and repeated `hello-shiny`
          lifecycle/crash matrices.
 3. [ ] Package hello-shiny as a native Windows desktop executable and verify it
@@ -245,11 +245,15 @@ Phase 2 now has independently tested native startup foundations in
 suspended Job assignment, explicit sanitized-environment construction, exact
 process/listener identity, protected token/control files, and an integrated
 synthetic lifecycle owner with authenticated readiness and deterministic
-cleanup. These passing tests are not yet a real-R lifecycle claim. Phase 2
-remains open until the released portable runtime and `hello-shiny` pass
-authenticated readiness, graceful and forced close, shell and launcher crash,
-timeout/takeover, descendant cleanup, and profile/secret cleanup as one
-integrated executable.
+cleanup. The
+[reviewed released-runtime run](https://github.com/rpackit/rpackit-tauri/actions/runs/30233439589)
+also passed with the SHA-256-pinned portable R 4.6.1 Release and pinned
+`hello-shiny`: native interpreter/package loading, authenticated content,
+credential denial, graceful and forced close, owner drop, runtime crash,
+timeout/takeover, descendant Job cleanup, hostile-profile isolation, and
+private-session cleanup. This closes the real-R process-owner gate. Phase 2
+remains open for native proxy/WebView composition and generated application
+resources.
 
 ## Later targets
 
