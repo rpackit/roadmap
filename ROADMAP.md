@@ -12,7 +12,7 @@ native build API or artifact already exists.
 | Target | Inspection or planning | Implemented output |
 |---|---|---|
 | Portable desktop resources | Implemented | Versioned resource bundle with portable R and authenticated managed Shiny lifecycle |
-| Native Tauri desktop app | Phase 1 complete; released-R Phase 2 owner verified; shell composition in progress | Verified transport and released-R process-owner lifecycle; no generated app or installer |
+| Native Tauri desktop app | Phase 1 complete; native proxy/released-R composition verified; WebView shell integration in progress | Verified transport and combined native proxy/process lifecycle; no generated app or installer |
 | Static web | Compatibility assessment only | Builder not yet implemented |
 | Dynamic server | Compatibility assessment only | Builder not yet implemented |
 
@@ -140,6 +140,11 @@ transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
    - [x] Drive those layers through a real bundled R launch, authenticated
          readiness, graceful/forced shutdown, and repeated `hello-shiny`
          lifecycle/crash matrices.
+   - [x] Compose the authenticated proxy and R lifecycle under one native
+         owner: bind/classify the random browser origin before R, share one
+         `S`/`P`/`B` set, expose only native `P`/`B` launch handles after
+         readiness, stop proxy traffic before forced cleanup, and pass both
+         synthetic and released-R/`hello-shiny` composition gates.
 3. [ ] Package hello-shiny as a native Windows desktop executable and verify it
        on a clean machine without system R.
 4. [ ] Generate a release workflow that publishes the verified native artifact,
@@ -246,14 +251,14 @@ suspended Job assignment, explicit sanitized-environment construction, exact
 process/listener identity, protected token/control files, and an integrated
 synthetic lifecycle owner with authenticated readiness and deterministic
 cleanup. The
-[reviewed released-runtime run](https://github.com/rpackit/rpackit-tauri/actions/runs/30233439589)
+[reviewed native-composition run](https://github.com/rpackit/rpackit-tauri/actions/runs/30234829826)
 also passed with the SHA-256-pinned portable R 4.6.1 Release and pinned
-`hello-shiny`: native interpreter/package loading, authenticated content,
-credential denial, graceful and forced close, owner drop, runtime crash,
-timeout/takeover, descendant Job cleanup, hostile-profile isolation, and
-private-session cleanup. This closes the real-R process-owner gate. Phase 2
-remains open for native proxy/WebView composition and generated application
-resources.
+`hello-shiny`: native interpreter/package loading, one-time bootstrap,
+authenticated direct and proxied content, credential denial, graceful and
+forced close, owner drop, runtime crash, timeout/takeover, proxy/descendant Job
+cleanup, hostile-profile isolation, and private-session cleanup. This closes
+the real-R native proxy/process composition gate. Phase 2 remains open for
+WebView/window/profile ownership and generated application resources.
 
 ## Later targets
 
