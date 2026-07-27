@@ -52,14 +52,17 @@ package/tree and exact loaded version, contain no unproven gate, and record
 `phase1_release_ready: true`. Phase 1 is complete, but the spike is not a
 generated or supported app; real launcher lifecycle begins in Phase 2.
 
-The current implementation has since completed the native lifecycle and source
-generation milestones. `rpackit` now generates and validates
-application-specific Tauri source from the versioned
-`windows-template-v1.0.0` template, and the
-[generated-project gate](https://github.com/rpackit/rpackit/actions/runs/30239483026)
+The current implementation has completed the native lifecycle, source
+generation, and first installer milestones. `rpackit` now generates and
+validates application-specific Tauri source from the versioned
+`windows-template-v1.1.0` template, and the
+[generated-project gate](https://github.com/rpackit/rpackit/actions/runs/30242046961)
 compiles and runs generated `hello-shiny` through the released portable-R and
-native WebView owner lifecycle. Native installer packaging and clean-machine
-verification remain next.
+native WebView owner lifecycle. The
+[first unsigned prerelease](https://github.com/rpackit/rpackit-examples/releases/tag/hello-shiny-v0.1.0)
+is a current-user NSIS installer that was installed, started with system R
+removed from the acceptance process PATH and R environment, checked for native
+cleanup, and uninstalled.
 
 Start with:
 

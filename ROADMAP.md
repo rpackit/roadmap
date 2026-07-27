@@ -12,7 +12,7 @@ native build API or artifact already exists.
 | Target | Inspection or planning | Implemented output |
 |---|---|---|
 | Portable desktop resources | Implemented | Versioned resource bundle with portable R and authenticated managed Shiny lifecycle |
-| Native Tauri desktop app | Phases 1-3 complete; native packaging is next | Generated application-specific source compiles and passes the real-R/WebView lifecycle; no installer |
+| Native Tauri desktop app | First installer milestone complete; unsigned prerelease available | Generated application-specific source passes the real-R/WebView lifecycle and produces a verified current-user NSIS installer |
 | Static web | Compatibility assessment only | Builder not yet implemented |
 | Dynamic server | Compatibility assessment only | Builder not yet implemented |
 
@@ -20,9 +20,12 @@ The currently runnable R-package sequence extends from
 `prepare_desktop()` and `validate_desktop_bundle()` through
 `generate_tauri_app()` and `validate_tauri_project()`. The generated project
 stamps the maintained native shell with application resources, identity,
-version, optional icon, and authenticated launch-contract metadata. The source
-compiles and passes the real proxy/R/WebView lifecycle gate, but it is not yet
-a native installer.
+version, optional icon, authenticated launch-contract metadata, and current-user
+NSIS packaging configuration. The
+[`hello-shiny-v0.1.0` prerelease](https://github.com/rpackit/rpackit-examples/releases/tag/hello-shiny-v0.1.0)
+was built from pinned sources, installed, started without system R available
+through the acceptance process PATH or R environment, checked for native
+cleanup, and uninstalled.
 
 ## Delivered foundation
 
@@ -158,14 +161,17 @@ transport contract version `2` in `TAURI_SECURE_TRANSPORT.md`.
        bundle, including application-specific metadata, assets, and launch
        configuration.
    - [x] Pass the
-         [generated-project gate](https://github.com/rpackit/rpackit/actions/runs/30239483026):
+         [generated-project gate](https://github.com/rpackit/rpackit/actions/runs/30242046961):
          compile the generated `hello-shiny` source, run it through the native
          owner, verify secret-free evidence, and remove runner-scoped runtime
          and build storage.
-4. [ ] Package hello-shiny as a native Windows desktop executable and verify it
-       on a clean machine without system R.
-5. [ ] Generate a release workflow that publishes the verified native artifact,
-       checksum, signing status, and build provenance.
+4. [x] Package `hello-shiny` as a current-user Windows NSIS installer and verify
+       install, bundled-R startup without system R in the acceptance process
+       PATH or R environment, native cleanup, and uninstall.
+5. [x] Publish the
+       [unsigned `hello-shiny-v0.1.0` prerelease](https://github.com/rpackit/rpackit-examples/releases/tag/hello-shiny-v0.1.0)
+       with the installer, SHA-256 checksum, installed evidence, explicit
+       signing status, and build provenance.
 
 Phase 1 progress is tracked in
 [`rpackit-tauri`](https://github.com/rpackit/rpackit-tauri). Its pre-release
@@ -277,9 +283,13 @@ proxy/descendant Job cleanup, hostile-profile isolation, private-session
 cleanup, cookie deletion, window destruction, and exact profile removal.
 Phase 2 is complete. Phase 3 now also generates and validates
 application-specific source from the versioned
-`windows-template-v1.0.0` template. The generated `hello-shiny` project
-compiles and passes the real released-R/WebView owner gate. Native executable
-packaging and clean-machine verification remain the next milestone.
+`windows-template-v1.1.0` template. The generated `hello-shiny` project
+compiles, passes the real released-R/WebView owner gate, and defaults to
+current-user NSIS packaging. The first unsigned installer prerelease has also
+passed install, bundled-R startup without access to system R through the
+acceptance process PATH or R environment, cleanup, and uninstall. Code signing
+and validation on a separate image with no system R installed remain later
+hardening rather than blockers for this milestone.
 
 ## Later targets
 
