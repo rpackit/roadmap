@@ -32,6 +32,10 @@ cleanup, and uninstalled.
 - [x] Create organization profile
 - [x] Establish roadmap and contracts
 - [x] Create R package, runtime index, Windows builder, and examples repositories
+- [x] Retire the legacy `ShinyInstaller` Electron/npm prototype after audit:
+      preserve its one-command packaging goal in the planned
+      `build_desktop()` API, but do not carry forward its unpinned commands,
+      raw shell construction, or unvalidated output
 
 ## Delivered app inspection
 
